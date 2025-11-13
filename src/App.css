@@ -36,3 +36,106 @@
     transform: rotate(360deg);
   }
 }
+/* ---------------------------MIO---------------------------- */
+/* Reglas específicas para ocultar las flechas del input number */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0; /* Necesario para que Safari no aplique un margen */
+}
+
+.pokeMartBackground {
+    /* El gradiente azul vibrante como fondo principal */
+    background: linear-gradient(135deg, #428CFF, #8CBFFF, #428CFF);
+    
+    /* El patrón de baldosas sutil */
+    background-image: 
+        linear-gradient(135deg, #428CFF, #8CBFFF, #428CFF),
+        repeating-linear-gradient(45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 20px, transparent 20px, transparent 40px),
+        repeating-linear-gradient(-45deg, rgba(255,255,255,0.1) 0px, rgba(255,255,255,0.1) 20px, transparent 20px, transparent 40px);
+    
+    background-size: cover, 40px 40px, 40px 40px;
+    background-position: center;
+    background-blend-mode: overlay;
+}
+
+.adminTitle {
+    color: #FFFFFF; /* Blanco puro */
+    /* O si prefieres amarillo, como el de Pikachu */
+    /* color: #FFDE00; */ 
+    text-shadow: 2px 3px 4px rgba(0, 0, 0, 0.4); /* Sombra suave */
+    /* Puedes ajustar el tamaño si quieres que sea más grande que un h2 por defecto */
+    font-size: 2.5rem; /* Ejemplo de tamaño más grande */
+    letter-spacing: 1px; /* Espaciado entre letras para un look más "título" */
+}
+
+.Adminmain {
+  margin-left: 250px; /* mismo valor del sidebar */
+  width: 100%;
+}
+/* --- Responsive fix --- */
+@media (max-width: 992px) {
+  .sidebar {
+    position: relative; /* deja de ser fija */
+    width: 100%;
+    min-height: auto;
+  }
+
+  .Adminmain {
+    margin-left: 0 !important; /* sin desplazamiento */
+  }
+}
+.sidebar {
+  width: 250px; /* un poco más ancha */
+  min-height: 100vh; /* altura completa */
+  flex-shrink: 0; /* evita que se reduzca */
+  position: fixed;
+  top: 0;
+  left: 0;
+  overflow-y: auto;
+}
+
+.sidebar .nav-link {
+  color: #fff;
+  padding: 15px 20px; /* más espacio para hacer clic */
+  border-bottom: 1px solid #0011ff; /* separadores más visibles */
+  border-right: 1px solid #0011ff; /* separadores más visibles */
+}
+.sidebar .nav-link:hover {
+  background-color: #0081fa; /* color de fondo al pasar el ratón */
+}
+
+.dropdown {
+  position: relative !important;
+  overflow: visible !important;
+}
+
+.dropdown-menu {
+  z-index: 2000 !important;
+}
+
+.navbar,
+.dropdown {
+  position: relative !important;
+  overflow: visible !important;
+}
+/* Estilos para el modal del recibo de compra */
+.cart-receipt-modal .modal-content {
+  border-radius: 15px;
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.15);
+  overflow: hidden;
+}
+
+.cart-receipt-modal img {
+  border-radius: 10px;
+  transition: transform 0.2s ease;
+}
+
+.cart-receipt-modal img:hover {
+  transform: scale(1.05);
+}
+
+.cart-receipt-modal .modal-footer button {
+  min-width: 130px;
+  font-weight: 500;
+}
