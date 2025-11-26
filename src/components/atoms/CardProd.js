@@ -3,12 +3,11 @@ import { Card } from "react-bootstrap";
 import { motion } from "framer-motion";
 
 export default function CardProd({ producto, onAddToCart }) {
-  if (!producto.activo || producto.stock_actual === 0) return null;
+  if (!producto.active || producto.stock_actual === 0) return null;
 
   const handleAdd = () => {
     if (onAddToCart) onAddToCart(producto.id);
   };
-
   return (
     <motion.div
       className="col"

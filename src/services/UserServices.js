@@ -1,26 +1,27 @@
 import axios from 'axios';
+import { BASE_URL } from './Connection';
 
-const IPv4 = '54.221.135.6';
-const BASE_URL = `http://${IPv4}:3000/usuarios`;
-class UserService {
+// Definimos el endpoint específico para este servicio
+const USERS_ENDPOINT = `${BASE_URL}/usuarios`;
+class UserServices {
 
     getAllUsers() {
-        return axios.get(BASE_URL); 
+        return axios.get(USERS_ENDPOINT); 
     }
 
     getUsersById(id) {
-    return axios.get(`${BASE_URL}/${id}`);
+    return axios.get(`${USERS_ENDPOINT}/${id}`);
     }
 
     createUser(user) {
-    return axios.post(BASE_URL, user);
+    return axios.post(USERS_ENDPOINT, user);
     }
 
     updateUser(id, user) {
-    return axios.put(`${BASE_URL}/${id}`, user);
+    return axios.put(`${USERS_ENDPOINT}/${id}`, user);
     }
 
     deleteUser(id) {
-    return axios.delete(`${BASE_URL}/${id}`);
+    return axios.delete(`${USERS_ENDPOINT}/${id}`);
     }
 }

@@ -1,9 +1,25 @@
+import { useEffect, useState } from "react";
 import { Container, Row, Col, Button } from "react-bootstrap";
 import { Link } from "react-router-dom";
 import ProductGrid from "../molecules/ProductGridH.js";
-import productos from "../../data/Products.js";
+//import productos from "../../data/Products.js";
+import ProductServices from "../../services/ProductServices.js";
 import '../../App.css';
 export default function SectionNovedades() {
+    const [productos, setProductos] = useState([]);
+    // Cargar productos DESDE LA API REST
+      useEffect(() => {
+        ProductServices.getAllProducts()
+          .then((res) => {
+            setProductos(res.data);
+          })
+          .catch((err) => console.error("Error cargando productos:", err));
+      }, []);
+
+      // Filtrar solo los productos activos y tomar los últimos 8
+    const productosActivos = productos
+        .filter((p) => p.active && p.stock_actual > 0) // solo activos con stock
+        .slice(-8);                                    // últimos 8 agregados(del final del arreglo)
   return (
     <>  
         <section className="container-xxl bg-lechuga py-5 text-center rounded-4 mb-5 pokeMartBackground">
@@ -26,7 +42,7 @@ export default function SectionNovedades() {
                 src="https://images.wikidexcdn.net/mwuploads/wikidex/9/99/latest/20250108072751/Tienda_Pok%C3%A9mon_en_RFVH.png"
                 alt="Tienda Pokémon"
                 className="img-fluid rounded-5 shadow"
-                style={{ height: "300px", objectFit: "contain" }}
+                style={{ height: "250px", objectFit: "contain" }}
                 />
             </Col>
             </Row>
@@ -35,7 +51,7 @@ export default function SectionNovedades() {
 
         <section className="container-xxl bg-carne pb-5 py-4 rounded-4 mb-5">
             
-            <ProductGrid productos={productos} />
+            <ProductGrid productos={productosActivos} />
         </section>
     </>
   );

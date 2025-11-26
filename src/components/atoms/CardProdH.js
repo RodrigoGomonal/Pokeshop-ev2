@@ -2,7 +2,7 @@ import React from "react";
 import { Card } from "react-bootstrap";
 
 export default function CardProdtH({ producto }) {
-  if (!producto.activo || producto.stock_actual === 0) return null;
+  if (!producto.active || producto.stock_actual === 0) return null;
   
   return (
     <div className="col">

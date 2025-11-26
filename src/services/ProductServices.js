@@ -1,26 +1,28 @@
+// src/services/ProductServices.js
 import axios from 'axios';
+import { BASE_URL } from './Connection';
 
-const IPv4 = '54.221.135.6';
-const BASE_URL = `http://${IPv4}:3000/productos`;
-class ProductService {
+// Definimos el endpoint específico para este servicio
+const PRODUCTS_ENDPOINT = `${BASE_URL}/productos`;
+export default class ProductServices {
 
-    getAllProducts() {
-        return axios.get(BASE_URL); 
+    static getAllProducts() {
+        return axios.get(PRODUCTS_ENDPOINT); 
     }
 
-    getProductsById(id) {
-    return axios.get(`${BASE_URL}/${id}`);
+    static getProductsById(id) {
+    return axios.get(`${PRODUCTS_ENDPOINT}/${id}`);
     }
 
-    createProduct(product) {
-    return axios.post(BASE_URL, product);
+    static createProduct(product) {
+    return axios.post(PRODUCTS_ENDPOINT, product);
     }
 
-    updateProduct(id, product) {
-    return axios.put(`${BASE_URL}/${id}`, product);
+    static updateProduct(id, product) {
+    return axios.put(`${PRODUCTS_ENDPOINT}/${id}`, product);
     }
 
-    deleteProduct(id) {
-    return axios.delete(`${BASE_URL}/${id}`);
+    static deleteProduct(id) {
+    return axios.delete(`${PRODUCTS_ENDPOINT}/${id}`);
     }
 }

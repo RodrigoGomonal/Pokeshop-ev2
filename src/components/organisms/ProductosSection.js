@@ -1,18 +1,22 @@
+// src/components/organisms/ProductosSection.js
 import React, { useState, useMemo, useEffect} from "react";
-import { getCart, saveCart, updateCartCount, getProducts } from "../../utils/CartUtils";
+import { getCart, saveCart, updateCartCount } from "../../utils/CartUtils";
 import ProductGrid from "../molecules/ProductGrid";
-//import productos from "../../data/Products.js";
+import ProductServices from "../../services/ProductServices.js";
+import CategoryServices from "../../services/CategoryServices.js";
 
 export default function ProductosSection() {
   const [productos, setProductos] = useState([]);
+  const [categorias, setCategorias] = useState([]);
   const [search, setSearch] = useState("");
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
+  
   // Cargar productos desde el inventario en localStorage
-  useEffect(() => {
+  /* useEffect(() => {
     const prods = getProducts();
     setProductos(prods);
 
-    // 🔹 Escuchar cuando el admin actualiza el inventario
+    // Escuchar cuando el admin actualiza el inventario
     const actualizarProductos = () => {
       const nuevos = getProducts();
       setProductos(nuevos);
@@ -20,22 +24,50 @@ export default function ProductosSection() {
 
     window.addEventListener("products-updated", actualizarProductos);
     return () => window.removeEventListener("products-updated", actualizarProductos);
-  }, []);
+  }, []); */
   
-  // Obtener categorías únicas de los productos
-  const categorias = useMemo(() => {
-      const cats = productos
-      .filter((p) => p.activo)
-      .map((p) => p.category);
-      return ["Todas", ...new Set(cats)];
-  }, [productos]);
+  // Cargar productos DESDE LA API REST
+  useEffect(() => {
+    ProductServices.getAllProducts()
+      .then((res) => {
+        setProductos(res.data);
+      })
+      .catch((err) => console.error("Error cargando productos:", err));
+  }, []);
+
+  useEffect(() => {
+  CategoryServices.getAllCategories()
+    .then((res) => {
+      setCategorias(res.data || []);
+    })
+    .catch((err) => console.error("Error cargando categorías:", err));
+  }, []);
+
+  // crear un mapa id -> name usando useMemo para evitar recalculos innecesarios
+  useEffect(() => {
+  CategoryServices.getAllCategories()
+    .then((res) => {
+      // Filtrar solo categorías activas
+      const categoriasActivas = (res.data || []).filter(
+        (cat) => cat && cat.active === true
+      );
+      const categoriasConTodas = [
+        { id: "Todas", name: "Todas" },
+        ...categoriasActivas,
+      ];
+      setCategorias(categoriasConTodas);
+    })
+    .catch((err) => console.error("Error cargando categorías:", err));
+}, []);
 
   const productosFiltrados = useMemo(() => {
     return productos.filter((p) => {
       const cumpleCategoria =
-        categoriaSeleccionada === "Todas" || p.category === categoriaSeleccionada;
+        categoriaSeleccionada === "Todas" || p.category_id === categoriaSeleccionada;
+
       const cumpleBusqueda = p.name.toLowerCase().includes(search.toLowerCase());
-      return p.activo && p.stock_actual > 0 && cumpleCategoria && cumpleBusqueda;
+
+      return p.active && p.stock_actual > 0 && cumpleCategoria && cumpleBusqueda;
     });
   }, [productos, categoriaSeleccionada, search]);
 
@@ -76,14 +108,14 @@ export default function ProductosSection() {
             <ul className="list-group">
               {categorias.map((cat) => (
                 <li
-                  key={cat}
+                  key={cat.id}
                   className={`list-group-item list-group-item-action ${
-                    categoriaSeleccionada === cat ? "active" : ""
+                    categoriaSeleccionada === cat.id ? "active" : ""
                   }`}
                   style={{ cursor: "pointer" }}
-                  onClick={() => setCategoriaSeleccionada(cat)}
+                  onClick={() => setCategoriaSeleccionada(cat.id)}
                 >
-                  {cat}
+                  {cat.name}
                 </li>
               ))}
             </ul>
