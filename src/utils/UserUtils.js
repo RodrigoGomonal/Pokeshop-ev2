@@ -1,5 +1,4 @@
 // src/utils/UserUtils.js
-import usersList from "../data/Users";
 // ------------------------- VALIDACIONES -----------------------------
 
 // Formatea un RUT chileno, e.g. "12345678K" => "12.345.678-K"
@@ -40,7 +39,50 @@ export function validarTelefono(telefono) {
   return regex.test(telefono);
 }
 
+// --------------------- Gestión de sesión activa ---------------------
+
+const SESSION_KEY = "usuarioActivo";
+
+/**
+ * Guarda el usuario activo en sessionStorage
+ * @param {Object} usuario - Datos del usuario logueado
+ */
+export function setCurrentUser(usuario) {
+  sessionStorage.setItem(SESSION_KEY, JSON.stringify(usuario));
+  window.dispatchEvent(new Event("usuario-login"));
+}
+
+/**
+ * Obtiene el usuario activo desde sessionStorage
+ * @returns {Object|null} Usuario actual o null
+ */
+export function getCurrentUser() {
+  const user = sessionStorage.getItem(SESSION_KEY);
+  return user ? JSON.parse(user) : null;
+}
+
+/**
+ * Cierra la sesión del usuario
+ */
+export function logout() {
+  sessionStorage.removeItem(SESSION_KEY);
+  window.dispatchEvent(new Event("usuario-logout"));
+}
+
+/**
+ * Verifica si hay un usuario logueado
+ * @returns {boolean}
+ */
+export function isAuthenticated() {
+  return getCurrentUser() !== null;
+}
+
+
+
+
 // ------------------------- LOCALSTORAGE -----------------------------
+//import usersList from "../data/Users";
+const usersList = ""; // IGNORE
 /**
  * Carga los productos desde localStorage y escucha cambios globales.
  * 

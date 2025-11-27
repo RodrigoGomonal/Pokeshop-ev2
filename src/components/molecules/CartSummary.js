@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { getCart, getProducts } from "../../utils/CartUtils";
-//import productos from "../../data/Products.js";
+import { getCart } from "../../utils/CartUtils";
 import CartReceiptModal from "./CartReceiptModal";
+import ProductServices from "../../services/ProductServices.js";
+import CategoryServices from "../../services/CategoryServices";
 
 export default function CartSummary() {
   const [cart, setCart] = useState([]);
@@ -9,34 +10,57 @@ export default function CartSummary() {
   const [descuento, setDescuento] = useState(0);
   const [showReceipt, setShowReceipt] = useState(false);
 
-  const loadCart = () => {
-    const cartItems = getCart();
-    const storedProducts = getProducts();
-
-    const detalle = cartItems
-      .map((ci) => {
-        const p = storedProducts.find((x) => x.id === ci.id);
-        if (!p) return null;
-        // Normalizar la forma que usa el modal:
-        return {
-          id: p.id,
-          name: p.name ?? p.nombre,
-          image: p.image ?? p.imagen,
-          price: p.price ?? p.precio ?? 0,
-          quantity: ci.quantity ?? ci.cantidad ?? 1,
-          category: p.category ?? p.categoria,
-        };
-      })
-      .filter(Boolean);
-    setCart(detalle);
-  };
-
   useEffect(() => {
     loadCart();
+    
     const onUpdate = () => loadCart();
     window.addEventListener("cart-updated", onUpdate);
     return () => window.removeEventListener("cart-updated", onUpdate);
   }, []);
+
+  const loadCart = async () => {
+    try {
+      // 1. Obtener carrito de localStorage (solo IDs y cantidades)
+      const cartItems = getCart();
+
+      if (cartItems.length === 0) {
+        setCart([]);
+        return;
+      }
+
+      // 2. Obtener productos y categorías desde BD
+      const [productosRes, categoriasRes] = await Promise.all([
+        ProductServices.getAllProducts(),
+        CategoryServices.getAllCategories()
+      ]);
+
+      const productos = productosRes.data;
+      const categorias = categoriasRes.data;
+
+      // 3. Enlazar productos con cantidades del carrito
+      const detalle = cartItems
+        .map((ci) => {
+          const p = productos.find((x) => x.id === ci.id);
+          if (!p) return null;
+          // Buscar nombre de categoría
+          const categoria = categorias.find((c) => c.id === p.category_id);
+          // Normalizar campos para el modal
+          return {
+            id: p.id,
+            name: p.name,
+            image: p.image,
+            price: p.price,
+            quantity: ci.quantity,
+            category: categoria ? categoria.name : "Sin categoría",
+          };
+        })
+        .filter(Boolean);
+
+      setCart(detalle);
+    } catch (error) {
+      console.error("Error cargando carrito:", error);
+    }
+  };
 
   const aplicarCupon = () => {
     if (cupon.trim().toUpperCase() === "PIKACHU10") {
@@ -53,10 +77,9 @@ export default function CartSummary() {
 
   const handleOpen = () => setShowReceipt(true);
   const handleClose = () => setShowReceipt(false);
+  
   const handleConfirmPurchase = () => {
-    // ya vaciamos el carrito dentro del modal (localStorage), pero recargamos el estado local
     loadCart();
-    // aquí puedes mostrar una notificación global si quieres
     console.log("Compra confirmada: total", totalConDescuento);
   };
 

@@ -90,7 +90,7 @@ export default function CartReceiptModal({ show, onClose, onConfirm, cartItems =
                 lineHeight: 1,
                 transform: "scale(1)",
                 transition: "transform .25s ease",
-              }}>✅</div>
+              }}>🤑</div>
               <h4 style={{ margin: 0 }}>Compra realizada</h4>
               <p style={{ margin: 0, color: "#666" }}>¡Gracias por tu compra!</p>
             </div>
@@ -119,7 +119,7 @@ export default function CartReceiptModal({ show, onClose, onConfirm, cartItems =
                     <tr style={{ textAlign: "left", color: "#666" }}>
                       <th style={{ padding: "8px 6px" }}>Producto</th>
                       <th style={{ padding: "8px 6px", textAlign: "center" }}>Cantidad</th>
-                      <th style={{ padding: "8px 6px", textAlign: "right" }}>Precio</th>
+                      <th style={{ padding: "8px 6px", textAlign: "right" }}>Precio ud.</th>
                       <th style={{ padding: "8px 6px", textAlign: "right" }}>Subtotal</th>
                     </tr>
                   </thead>
@@ -134,8 +134,8 @@ export default function CartReceiptModal({ show, onClose, onConfirm, cartItems =
                             onError={(e) => { e.target.onerror = null; e.target.src = "https://placehold.co/64x64/eee/aaa?text=N/A"; }}
                           />
                           <div>
-                            <div style={{ fontWeight: 600 }}>{it.name ?? it.nombre}</div>
-                            <div style={{ fontSize: 12, color: "#777" }}>{(it.category || it.categoria) ?? ""}</div>
+                            <div style={{ fontWeight: 600, textAlign: "left" }}>{it.name ?? it.nombre}</div>
+                            <div style={{ fontSize: 12, color: "#777", textAlign: "left" }}>{(it.category || it.categoria) ?? ""}</div>
                           </div>
                         </td>
                         <td style={{ padding: "10px 6px", textAlign: "center" }}>{it.quantity ?? it.cantidad ?? 1}</td>
@@ -149,7 +149,7 @@ export default function CartReceiptModal({ show, onClose, onConfirm, cartItems =
                     ))}
                   </tbody>
                 </table>
-
+                
                 <div style={{ display: "flex", justifyContent: "flex-end", marginTop: 14, gap: 18 }}>
                   <div style={{ textAlign: "right" }}>
                     <div style={{ color: "#666" }}>Total</div>

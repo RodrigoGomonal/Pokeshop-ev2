@@ -1,68 +1,97 @@
 import React, { useEffect, useState } from "react";
-import { getCart, saveCart, updateCartCount, getProducts } from "../../utils/CartUtils";
-//import productos from "../../data/Products.js";
+import { getCart, saveCart } from "../../utils/CartUtils";
+import ProductServices from "../../services/ProductServices.js";
+
 
 export default function CartList() {
   const [cartItems, setCartItems] = useState([]);
-  const [cargado, setCargado] = useState(false);
-  ///const [productos, setProductos] = useState([]);
+  const [cargando, setCargando] = useState(true);
 
-  // Cargar el carrito al montar el componente
+  // Cargar carrito y productos de BD
   useEffect(() => {
-    // Obtener el carrito actual
-      const cart = getCart();
-      // Carga los productos más recientes desde localStorage
-      const storedProducts = getProducts();
-      //setProductos(storedProducts);
-      
-      // Enlazar los productos por id
-      const detailCart = cart.map(item => {
-        const prod = storedProducts.find(p => p.id === item.id);
-        return prod ? { ...prod, quantity: item.quantity } : null;
-      }).filter(Boolean); // quita los null por si algún id ya no existe
-      setCartItems(detailCart);
-      setCargado(true);
+    cargarCarrito();
+    
+    // Escuchar cambios en el carrito
+    const handleUpdate = () => cargarCarrito();
+    window.addEventListener("cart-updated", handleUpdate);
+    return () => window.removeEventListener("cart-updated", handleUpdate);
   }, []);
-  // Sincroniza el carrito en localStorage y estado
-  const syncCart = (updatedCart) => {
-    saveCart(updatedCart);
-    setCartItems(updatedCart);
-    updateCartCount();
-    window.dispatchEvent(new Event("cart-updated")); // 🔔 notificar cambio
-  };
-  // Función para eliminar un producto del carrito
-  const removeItem = (productName) => {
-    const updatedCart = cartItems.filter((item) => item.name !== productName);
-    saveCart(updatedCart);
-    setCartItems(updatedCart);
-    updateCartCount();
-  };
-  // Función para actualizar cantidad de un producto en el carrito
-  const updateQuantity = (productName, action) => {
-    const updatedCart = cartItems.map((item) => {
-      if (item.name === productName) {
-        let newQty = item.quantity;
-        if (action === "increment") newQty++;
-        else if (action === "decrement" && item.quantity > 1) newQty--;
-        else if (action === "decrement" && item.quantity === 1) return null;
-        return { ...item, quantity: newQty };
+
+  const cargarCarrito = async () => {
+    try {
+      // 1. Obtener carrito de localStorage (solo IDs y cantidades)
+      const cart = getCart(); // [{ id: 1, quantity: 2 }, ...]
+
+      if (cart.length === 0) {
+        setCartItems([]);
+        setCargando(false);
+        return;
       }
-      return item;
-    }).filter(Boolean); // elimina nulls (productos borrados)
+
+      // 2. Obtener productos completos desde la BD
+      const response = await ProductServices.getAllProducts();
+      const productos = response.data;
+
+      // 3. Enlazar productos con cantidades del carrito
+      const detailCart = cart
+        .map((item) => {
+          const prod = productos.find((p) => p.id === item.id);
+          return prod ? { ...prod, quantity: item.quantity } : null;
+        })
+        .filter(Boolean);
+
+      setCartItems(detailCart);
+    } catch (error) {
+      console.error("Error cargando carrito:", error);
+    } finally {
+      setCargando(false);
+    }
+  };
+
+  // Eliminar producto del carrito
+  const removeItem = (productId) => {
+    const cart = getCart();
+    const updatedCart = cart.filter((item) => item.id !== productId);
+    saveCart(updatedCart);
+  };
+
+  // Actualizar cantidad
+  const updateQuantity = (productId, action) => {
+    const cart = getCart();
+    const updatedCart = cart
+      .map((item) => {
+        if (item.id === productId) {
+          let newQty = item.quantity;
+          if (action === "increment") newQty++;
+          else if (action === "decrement" && item.quantity > 1) newQty--;
+          else if (action === "decrement" && item.quantity === 1) return null;
+          return { ...item, quantity: newQty };
+        }
+        return item;
+      })
+      .filter(Boolean);
 
     saveCart(updatedCart);
-    setCartItems(updatedCart);
-    updateCartCount();
-    syncCart(updatedCart);
   };
-  // Si está vacío muestra un mensaje
-  if (cargado && cartItems.length === 0) {
+
+  if (cargando) {
+    return (
+      <div className="text-center">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (cartItems.length === 0) {
     return (
       <div className="alert alert-info text-center" role="alert">
         Tu carrito está vacío. ¡Añade algunos productos!
       </div>
     );
   }
+
   return (
     <div id="cart-items-container">
       {cartItems.map((item) => {
@@ -70,7 +99,6 @@ export default function CartList() {
         return (
           <div
             className="card mb-3 cart-item shadow-sm"
-            data-name={item.name}
             key={item.id}
             style={{ maxWidth: "540px" }}
           >
@@ -90,12 +118,11 @@ export default function CartList() {
                 <div className="card-body">
                   <h5 className="card-title">{item.name}</h5>
                   <p className="card-text text-muted">
-                    Precio unitario: $
-                    {(item.price || 0).toLocaleString("es-CL")}
+                    Precio unitario: ${(item.price || 0).toLocaleString("es-CL")}
                   </p>
                   <button
                     className="btn btn-sm btn-danger"
-                    onClick={() => removeItem(item.name)}
+                    onClick={() => removeItem(item.id)}
                   >
                     <i className="bi bi-trash"></i> Eliminar
                   </button>
@@ -112,7 +139,7 @@ export default function CartList() {
                   <div className="input-group input-group-sm w-75 mx-auto">
                     <button
                       className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updateQuantity(item.name, "decrement")}
+                      onClick={() => updateQuantity(item.id, "decrement")}
                     >
                       −
                     </button>
@@ -124,7 +151,7 @@ export default function CartList() {
                     />
                     <button
                       className="btn btn-outline-secondary btn-sm"
-                      onClick={() => updateQuantity(item.name, "increment")}
+                      onClick={() => updateQuantity(item.id, "increment")}
                     >
                       +
                     </button>

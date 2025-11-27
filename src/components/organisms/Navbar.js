@@ -5,10 +5,43 @@ import NavMenu from "../molecules/NavMenu";
 import ButtonLink from "../atoms/ButtonLink";
 import CartButton from "../molecules/CartButton";
 import UserChip from "../molecules/UserChip";
+import { getCurrentUser, logout } from "../../utils/UserUtils";
+import { useNavigate } from "react-router-dom";
 import '../../App.css';
 
 export default function Navbar() {
+  const navigate = useNavigate();
   const [usuarioActivo, setUsuarioActivo] = useState(null);
+
+  useEffect(() => {
+    updateCartCount();
+
+    // Cargar usuario actual
+    setUsuarioActivo(getCurrentUser());
+
+    // Escuchar eventos de login/logout
+    const handleLogin = () => {
+      setUsuarioActivo(getCurrentUser());
+    };
+
+    const handleLogout = () => {
+      setUsuarioActivo(null);
+    };
+
+    window.addEventListener("usuario-login", handleLogin);
+    window.addEventListener("usuario-logout", handleLogout);
+
+    return () => {
+      window.removeEventListener("usuario-login", handleLogin);
+      window.removeEventListener("usuario-logout", handleLogout);
+    };
+  }, []);
+
+  const closeSesion = () => {
+    logout();
+    navigate("/");
+  };
+  /* const [usuarioActivo, setUsuarioActivo] = useState(null);
 
   useEffect(() => {
     updateCartCount();
@@ -39,7 +72,7 @@ export default function Navbar() {
     setUsuarioActivo(null);
     window.dispatchEvent(new Event("usuario-logout"));
     window.location.href = "/";
-  };
+  }; */
 
   return (
     <>

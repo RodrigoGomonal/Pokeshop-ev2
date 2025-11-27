@@ -4,7 +4,6 @@ import ProductDetailCard from "../../organisms/ProductDetailCard.js";
 import RelatedProducts from "../../organisms/RelatedProducts.js";
 import { useParams } from "react-router-dom";
 import { getCart, saveCart, updateCartCount, getProducts } from "../../../utils/CartUtils.js";
-//import productos from "../../../data/Products.js";
 
 export default function DetalleProducto(){
   const { id } = useParams();

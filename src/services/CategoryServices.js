@@ -11,18 +11,18 @@ export default class CategoryServices {
     }
 
     static getCategoriesById(id) {
-    return axios.get(`${CATEGORIES_ENDPOINT}/${id}`);
+        return axios.get(`${CATEGORIES_ENDPOINT}/${id}`);
     }
 
     static createCategory(product) {
-    return axios.post(CATEGORIES_ENDPOINT, product);
+        return axios.post(CATEGORIES_ENDPOINT, product);
     }
 
     static updateCategory(id, product) {
-    return axios.put(`${CATEGORIES_ENDPOINT}/${id}`, product);
+        return axios.put(`${CATEGORIES_ENDPOINT}/${id}`, product);
     }
 
     static deleteCategory(id) {
-    return axios.delete(`${CATEGORIES_ENDPOINT}/${id}`);
+        return axios.delete(`${CATEGORIES_ENDPOINT}/${id}`);
     }
 }

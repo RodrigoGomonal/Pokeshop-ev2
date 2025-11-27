@@ -1,5 +1,6 @@
 // src/utils/CartUtils.js
-import  productos  from "../data/Products.js"; 
+
+  import  productos  from "../data/Products.js"; 
 /**
  * Carga los productos desde localStorage y escucha cambios globales.
  * 
@@ -7,7 +8,7 @@ import  productos  from "../data/Products.js";
  * @param {Function} setPagina - Setter del estado de página (opcional).
  * @returns {Function} cleanup - Remueve el event listener.
  */
-export const loadCartData = (setItems, setPagina) => {
+/* export const loadCartData = (setItems, setPagina) => {
   // Cargar datos iniciales
   const productos = getProducts();
   if (productos && Array.isArray(productos)) {
@@ -25,7 +26,7 @@ export const loadCartData = (setItems, setPagina) => {
 
   // Retornar función de limpieza para useEffect
   return () => window.removeEventListener("products-updated", actualizar);
-};
+}; */
 
 // --------------------- Funciones compartidas del carrito ---------------------
 
@@ -64,6 +65,25 @@ export function updateCartCount() {
 
 // Escucha global para mantener actualizado el contador siempre
 window.addEventListener("cart-updated", updateCartCount);
+// --------------------- Agregar producto al carrito ---------------------
+
+/**
+ * Agrega un producto al carrito (solo guarda id y cantidad)
+ * @param {number} productId - ID del producto
+ * @param {number} quantity - Cantidad a agregar
+ */
+export const addToCart = (productId, quantity = 1) => {
+  const cart = getCart();
+  const existingItem = cart.find((item) => item.id === productId);
+
+  if (existingItem) {
+    existingItem.quantity += quantity;
+  } else {
+    cart.push({ id: productId, quantity });
+  }
+
+  saveCart(cart);
+};
 
 // --------------------- Funciones compartidas del inventario ---------------------
 
