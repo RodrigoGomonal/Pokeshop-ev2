@@ -42,28 +42,37 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar navbar-expand-lg shadow-sm pokeMartBackground">
-      <div className="container px-5">
-        <Logo />
-        <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-          <span className="navbar-toggler-icon"></span>
-        </button>
+    <>
+      <nav className="navbar navbar-expand-lg shadow-sm pokeMartBackground">
+        <div className="container px-5">
+          <Logo />
+          <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span className="navbar-toggler-icon"></span>
+          </button>
 
-        <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
-          <NavMenu />
-          <div className="d-flex">
-            <CartButton />
-            {usuarioActivo ? (
-              <UserChip usuario={usuarioActivo} onLogout={closeSesion} />
-            ) : (
-              <>
-                <ButtonLink label="Iniciar Sesión" href="/Login" variant="primary"/>
-                <ButtonLink label="Registrarse" href="/RegisterUsu" variant="outline"/>
-              </>
-            )}
+          <div className="collapse navbar-collapse justify-content-between" id="navbarNav">
+            <NavMenu />
+            <div className="d-flex">
+              <CartButton />
+              {usuarioActivo ? (
+                <UserChip usuario={usuarioActivo} onLogout={closeSesion} />
+              ) : (
+                <>
+                  <ButtonLink label="Iniciar Sesión" href="/Login" variant="primary"/>
+                  <ButtonLink label="Registrarse" href="/RegisterUsu" variant="outline"/>
+                </>
+              )}
+            </div>
           </div>
         </div>
-      </div>
-    </nav>
+      </nav>
+      <div 
+        style={{
+          height: '3px',
+          background: 'linear-gradient(to right, #3b82f6, #a855f7, #ec4899)',
+          width: '100%'
+        }}
+      />
+    </>
   );
 }

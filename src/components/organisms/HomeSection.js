@@ -42,7 +42,7 @@ export default function SectionNovedades() {
                 src="https://images.wikidexcdn.net/mwuploads/wikidex/9/99/latest/20250108072751/Tienda_Pok%C3%A9mon_en_RFVH.png"
                 alt="Tienda Pokémon"
                 className="img-fluid rounded-5 shadow"
-                style={{ height: "250px", objectFit: "contain" }}
+                style={{ height: "300px", objectFit: "contain" }}
                 />
             </Col>
             </Row>

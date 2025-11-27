@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { BASE_URL } from './Connection';
 
-// Definimos el endpoint específico para este servicio
 const USERS_ENDPOINT = `${BASE_URL}/usuarios`;
 class UserServices {
 

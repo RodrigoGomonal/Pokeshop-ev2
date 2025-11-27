@@ -2,7 +2,6 @@
 import axios from 'axios';
 import { BASE_URL } from './Connection';
 
-// Definimos el endpoint específico para este servicio
 const PRODUCTS_ENDPOINT = `${BASE_URL}/productos`;
 export default class ProductServices {
 

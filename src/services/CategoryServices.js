@@ -2,7 +2,6 @@
 import axios from 'axios';
 import { BASE_URL } from './Connection';
 
-// Definimos el endpoint específico para este servicio
 const CATEGORIES_ENDPOINT = `${BASE_URL}/categorias`;
 
 export default class CategoryServices {

@@ -41,7 +41,7 @@ export default function CardProd({ producto, onAddToCart }) {
           </div>
 
           <div className="d-flex justify-content-between align-items-center mt-3">
-            <span className="fw-bold text-danger">${producto.price}</span>
+            <span className="fw-bold">${producto.price}</span>
             <button
               className="btn btn-success btn-sm rounded-pill px-3"
               onClick={handleAdd}
