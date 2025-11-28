@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { getCart } from "../../utils/CartUtils";
+import { getCurrentUser } from "../../utils/UserUtils";
 import CartReceiptModal from "./CartReceiptModal";
+import AuthRequiredModal from "./AuthRequiredModal";
 import ProductServices from "../../services/ProductServices.js";
 import CategoryServices from "../../services/CategoryServices";
 
@@ -9,6 +11,7 @@ export default function CartSummary() {
   const [cupon, setCupon] = useState("");
   const [descuento, setDescuento] = useState(0);
   const [showReceipt, setShowReceipt] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
 
   useEffect(() => {
     loadCart();
@@ -22,7 +25,6 @@ export default function CartSummary() {
     try {
       // 1. Obtener carrito de localStorage (solo IDs y cantidades)
       const cartItems = getCart();
-
       if (cartItems.length === 0) {
         setCart([]);
         return;
@@ -75,12 +77,20 @@ export default function CartSummary() {
   const total = cart.reduce((s, it) => s + (it.price || 0) * (it.quantity || 0), 0);
   const totalConDescuento = Math.round(total * (1 - descuento));
 
-  const handleOpen = () => setShowReceipt(true);
+  const handleOpen = () => {
+    const usuario = getCurrentUser();
+    if (!usuario) {
+      setShowAuthModal(true);
+      return;
+    }
+    setShowReceipt(true);
+  };
+
   const handleClose = () => setShowReceipt(false);
+  const handleCloseAuth = () => setShowAuthModal(false);
   
   const handleConfirmPurchase = () => {
     loadCart();
-    console.log("Compra confirmada: total", totalConDescuento);
   };
 
   return (
@@ -105,6 +115,10 @@ export default function CartSummary() {
         onConfirm={handleConfirmPurchase}
         cartItems={cart}
         total={totalConDescuento}
+      />
+      <AuthRequiredModal
+        show={showAuthModal}
+        onClose={handleCloseAuth}
       />
       <hr />
     </>

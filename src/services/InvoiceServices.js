@@ -1,27 +1,26 @@
-import axios from 'axios';
-import { BASE_URL } from './Connection';
+import api from './AxiosConfig'; 
 
-const INVOICE_ENDPOINT = `${BASE_URL}/boletas`;
+const INVOICE_ENDPOINT = '/boletas';
 
 export default class InvoiceServices {
 
     static getAllInvoices() {
-        return axios.get(INVOICE_ENDPOINT);
+        return api.get(INVOICE_ENDPOINT);
     }
 
     static getInvoiceById(id) {
-        return axios.get(`${INVOICE_ENDPOINT}/${id}`);
+        return api.get(`${INVOICE_ENDPOINT}/${id}`);
     }
 
     static createInvoice(invoice) {
-        return axios.post(INVOICE_ENDPOINT, invoice);
+        return api.post(INVOICE_ENDPOINT, invoice);
     }
 
     static updateInvoice(id, invoice) {
-        return axios.put(`${INVOICE_ENDPOINT}/${id}`, invoice);
+        return api.put(`${INVOICE_ENDPOINT}/${id}`, invoice);
     }
 
     static deleteInvoice(id) {
-        return axios.delete(`${INVOICE_ENDPOINT}/${id}`);
+        return api.delete(`${INVOICE_ENDPOINT}/${id}`);
     }
 }

@@ -7,6 +7,7 @@ import CartButton from "../molecules/CartButton";
 import UserChip from "../molecules/UserChip";
 import { getCurrentUser, logout } from "../../utils/UserUtils";
 import { useNavigate } from "react-router-dom";
+import AuthService from "../../services/AuthService.js";
 import '../../App.css';
 
 export default function Navbar() {
@@ -37,42 +38,16 @@ export default function Navbar() {
     };
   }, []);
 
-  const closeSesion = () => {
-    logout();
-    navigate("/");
+  const closeSesion = async () => {
+    try {
+      await AuthService.logout();
+      logout();
+      navigate("/");
+      console.log("Sesión cerrada correctamente.");
+    } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+    }
   };
-  /* const [usuarioActivo, setUsuarioActivo] = useState(null);
-
-  useEffect(() => {
-    updateCartCount();
-
-    // Cargar usuario desde sessionStorage
-    const storedUser = sessionStorage.getItem("usuarioActivo");
-    if (storedUser) { setUsuarioActivo(JSON.parse(storedUser)); }
-
-    // Escuchar eventos de login/logout
-    const handleLogin = () => {
-      const user = sessionStorage.getItem("usuarioActivo");
-      setUsuarioActivo(user ? JSON.parse(user) : null);
-    };
-
-    const handleLogout = () => { setUsuarioActivo(null); };
-
-    window.addEventListener("usuario-login", handleLogin);
-    window.addEventListener("usuario-logout", handleLogout);
-
-    return () => {
-      window.removeEventListener("usuario-login", handleLogin);
-      window.removeEventListener("usuario-logout", handleLogout);
-    };
-  }, []);
-
-  const closeSesion = () => {
-    sessionStorage.removeItem("usuarioActivo");
-    setUsuarioActivo(null);
-    window.dispatchEvent(new Event("usuario-logout"));
-    window.location.href = "/";
-  }; */
 
   return (
     <>

@@ -1,27 +1,27 @@
-import axios from 'axios';
-import { BASE_URL } from './Connection';
+// src/services/PayMethServices.js
+import api from './AxiosConfig'; 
 
-const PAYMENT_METHOD_ENDPOINT = `${BASE_URL}/metodosPago`;
+const PAYMENT_METHOD_ENDPOINT = '/metodospago';
 
 export default class PaymentMethodServices {
 
     static getAllPaymentMethods() {
-        return axios.get(PAYMENT_METHOD_ENDPOINT);
+        return api.get(PAYMENT_METHOD_ENDPOINT);
     }
 
     static getPaymentMethodById(id) {
-        return axios.get(`${PAYMENT_METHOD_ENDPOINT}/${id}`);
+        return api.get(`${PAYMENT_METHOD_ENDPOINT}/${id}`);
     }
 
     static createPaymentMethod(method) {
-        return axios.post(PAYMENT_METHOD_ENDPOINT, method);
+        return api.post(PAYMENT_METHOD_ENDPOINT, method);
     }
 
     static updatePaymentMethod(id, method) {
-        return axios.put(`${PAYMENT_METHOD_ENDPOINT}/${id}`, method);
+        return api.put(`${PAYMENT_METHOD_ENDPOINT}/${id}`, method);
     }
 
     static deletePaymentMethod(id) {
-        return axios.delete(`${PAYMENT_METHOD_ENDPOINT}/${id}`);
+        return api.delete(`${PAYMENT_METHOD_ENDPOINT}/${id}`);
     }
 }

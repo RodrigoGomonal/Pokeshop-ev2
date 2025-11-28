@@ -1,9 +1,8 @@
 // src/services/ProductServices.js
-import axios from 'axios';
-import { BASE_URL } from './Connection';
 import api from './AxiosConfig'; 
 
-const PRODUCTS_ENDPOINT = `${BASE_URL}/productos`;
+const PRODUCTS_ENDPOINT = '/productos';
+
 export default class ProductServices {
 
     static getAllProducts() {
@@ -12,18 +11,18 @@ export default class ProductServices {
     }
 
     static getProductsById(id) {
-        return axios.get(`${PRODUCTS_ENDPOINT}/${id}`);
+        return api.get(`${PRODUCTS_ENDPOINT}/${id}`);
     }
 
     static createProduct(product) {
-        return axios.post(PRODUCTS_ENDPOINT, product);
+        return api.post(PRODUCTS_ENDPOINT, product);
     }
 
     static updateProduct(id, product) {
-        return axios.put(`${PRODUCTS_ENDPOINT}/${id}`, product);
+        return api.put(`${PRODUCTS_ENDPOINT}/${id}`, product);
     }
 
     static deleteProduct(id) {
-        return axios.delete(`${PRODUCTS_ENDPOINT}/${id}`);
+        return api.delete(`${PRODUCTS_ENDPOINT}/${id}`);
     }
 }

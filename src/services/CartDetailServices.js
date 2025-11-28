@@ -1,27 +1,26 @@
-import axios from 'axios';
-import { BASE_URL } from './Connection';
+import api from './AxiosConfig'; 
 
-const CARRITO_DETALLE_ENDPOINT = `${BASE_URL}/carritoDetalle`;
+const CART_DETAIL_ENDPOINT = '/carritoDetalle';
 
 export default class CartDetailServices {
 
     static getAllCartDetails() {
-        return axios.get(CART_DETAIL_ENDPOINT);
+        return api.get(CART_DETAIL_ENDPOINT);
     }
 
     static getCartDetailById(id) {
-        return axios.get(`${CART_DETAIL_ENDPOINT}/${id}`);
+        return api.get(`${CART_DETAIL_ENDPOINT}/${id}`);
     }
 
     static createCartDetail(detail) {
-        return axios.post(CART_DETAIL_ENDPOINT, detail);
+        return api.post(CART_DETAIL_ENDPOINT, detail);
     }
 
     static updateCartDetail(id, detail) {
-        return axios.put(`${CART_DETAIL_ENDPOINT}/${id}`, detail);
+        return api.put(`${CART_DETAIL_ENDPOINT}/${id}`, detail);
     }
 
     static deleteCartDetail(id) {
-        return axios.delete(`${CART_DETAIL_ENDPOINT}/${id}`);
+        return api.delete(`${CART_DETAIL_ENDPOINT}/${id}`);
     }
 }

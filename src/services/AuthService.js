@@ -1,33 +1,49 @@
+// src/services/AuthService.js
 import axios from 'axios';
 import { BASE_URL } from './Connection';
 
 //const API_URL = 'http://TU-IP-PUBLICA-EC2:3000/auth'; 
 const API_URL = `${BASE_URL}/auth`;// Endpoint de Auth
 
-class AuthService {
+export default class AuthService {
     
     // Iniciar Sesión
-    login(usuario, password) {
-        return axios.post(API_URL + '/login', { usuario, password })
+    static login(correo, clave) { // ✅ Cambiado: correo y clave
+        return axios.post(`${API_URL}/login`, { correo, clave })
             .then(response => {
                 if (response.data.token) {
-                    // 💾 GUARDAR EL TOKEN EN EL NAVEGADOR
+                    // Guardar token y usuario
                     localStorage.setItem('token', response.data.token);
+                    const usuario = response.data.user || response.data.usuario;
+                    localStorage.setItem('user', JSON.stringify(response.data.user));
+                    return {
+                        token: response.data.token,
+                        usuario: usuario // ✅ Siempre devolver como "usuario"
+                    };
                 }
                 return response.data;
             });
     }
 
     // Cerrar Sesión
-    logout() {
-        // 🗑️ ELIMINAR EL TOKEN
+    static logout() {
         localStorage.removeItem('token');
+        localStorage.removeItem('user');
     }
 
-    // Verificar si hay sesión activa
-    getCurrentUser() {
+    // Obtener usuario actual (completo)
+    static getCurrentUser() {
+        const user = localStorage.getItem('user');
+        return user ? JSON.parse(user) : null;
+    }
+
+    // Obtener solo el token
+    static getToken() {
         return localStorage.getItem('token');
     }
-}
 
-export default new AuthService();
+    // Verificar si está autenticado
+    static isAuthenticated() {
+        return this.getToken() !== null;
+    }
+}
