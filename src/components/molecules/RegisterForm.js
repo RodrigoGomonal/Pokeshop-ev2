@@ -6,7 +6,6 @@ import { formatearRut, validarRut, validarCorreo, validarTelefono } from "../../
 import UserServices from "../../services/UserServices";
 import RegionServices from "../../services/RegionServices";
 import CommuneServices from "../../services/CommuneServices";
-import { setCurrentUser } from "../../utils/UserUtils";
 
 export default function RegisterForm({ onRegistered }) {
 
@@ -195,20 +194,22 @@ export default function RegisterForm({ onRegistered }) {
         active: true
       };
 
-      console.log('Datos a enviar:', nuevoUsuario);
+      console.log('Registrando usuario:', nuevoUsuario);
 
       // 4. REGISTRAR EN LA BD EXTERNA (EC2)
       const response = await UserServices.createUser(nuevoUsuario);
       console.log('Usuario registrado:', response.data);
 
-      if (response.data.token) {
+      // 5. INICIAR SESIÓN AUTOMÁTICAMENTE
+      if (response.data.token && response.data.usuario) {
+        // Guardar con AuthService (recomendado)
         localStorage.setItem('token', response.data.token);
-        localStorage.setItem('user', JSON.stringify(response.data.usuario || response.data.user));
-        setCurrentUser(response.data.usuario || response.data.user);
+        localStorage.setItem('user', JSON.stringify(response.data.usuario));
+        console.log('✅ Sesión iniciada automáticamente');
       } else {
-        // Si no hay token, solo guardar usuario (menos seguro)
+        // Fallback: solo guardar el usuario sin token
+        console.warn('⚠️ Backend no devolvió token, solo usuario');
         localStorage.setItem('user', JSON.stringify(response.data));
-        setCurrentUser(response.data);
       }
 
       //if (onRegistered) onRegistered(response.data);

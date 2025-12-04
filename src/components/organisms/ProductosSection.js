@@ -11,21 +11,6 @@ export default function ProductosSection() {
   const [search, setSearch] = useState("");
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("Todas");
   
-  // Cargar productos desde el inventario en localStorage
-  /* useEffect(() => {
-    const prods = getProducts();
-    setProductos(prods);
-
-    // Escuchar cuando el admin actualiza el inventario
-    const actualizarProductos = () => {
-      const nuevos = getProducts();
-      setProductos(nuevos);
-    };
-
-    window.addEventListener("products-updated", actualizarProductos);
-    return () => window.removeEventListener("products-updated", actualizarProductos);
-  }, []); */
-  
   // Cargar productos DESDE LA API REST
   useEffect(() => {
     ProductServices.getAllProducts()
