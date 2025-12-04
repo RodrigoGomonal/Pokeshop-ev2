@@ -189,9 +189,9 @@ export default function LoginForm() {
           navigate("/");
           break;
         default:
-          // 🛑 ERROR DE SEGURIDAD/LÓGICA: Tipo de usuario no mapeado
+          //! ERROR DE SEGURIDAD/LÓGICA: Tipo de usuario no mapeado
           console.error("Tipo de usuario no reconocido en la aplicación:", usuario.tipousuario_id );
-          // Opcional: Cerrar sesión inmediatamente para evitar accesos no autorizados
+          //! Cerrar sesión inmediatamente para evitar accesos no autorizados
           AuthService.logout(); 
           setErrores({
             correo: "Tipo de usuario no reconocido. Contacte a soporte.",
@@ -201,7 +201,7 @@ export default function LoginForm() {
     } catch (error) {
       console.error("Error al iniciar sesión:", error);
       
-      // 🔍 Manejo de Errores Específicos de la API
+      // Manejo de Errores Específicos de la API
       let errorMessage = "Error al iniciar sesión. Intenta nuevamente o verifica la conexión.";
       
       // Si el error viene del backend (ej: código 401 Unauthorized), 

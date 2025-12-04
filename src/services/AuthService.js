@@ -18,7 +18,7 @@ export default class AuthService {
                     localStorage.setItem('user', JSON.stringify(response.data.user));
                     return {
                         token: response.data.token,
-                        usuario: usuario // ✅ Siempre devolver como "usuario"
+                        usuario: usuario
                     };
                 }
                 return response.data;

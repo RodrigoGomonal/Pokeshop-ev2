@@ -1,3 +1,4 @@
+// src/services/UserServices.js
 import api from './AxiosConfig'; 
 
 const USERS_ENDPOINT = '/usuarios';
@@ -26,5 +27,9 @@ export default class UserServices {
 
     static getUserByEmail(email) {
         return api.get(`${USERS_ENDPOINT}/email/${email}`);
+    }
+
+    static getUserByRut(rut) {
+        return api.get(`${USERS_ENDPOINT}/rut/${rut}`);
     }
 }
