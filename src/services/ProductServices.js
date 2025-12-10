@@ -14,6 +14,10 @@ export default class ProductServices {
         return api.get(`${PRODUCTS_ENDPOINT}/${id}`);
     }
 
+    static getProductsByCategId(id) {
+        return api.get(`${PRODUCTS_ENDPOINT}/relacionados/${id}`);
+    }
+
     static createProduct(product) {
         return api.post(PRODUCTS_ENDPOINT, product);
     }

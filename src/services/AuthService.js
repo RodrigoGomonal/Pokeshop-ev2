@@ -3,7 +3,7 @@ import axios from 'axios';
 import { BASE_URL } from './Connection';
 
 //const API_URL = 'http://TU-IP-PUBLICA-EC2:3000/auth'; 
-const API_URL = `${BASE_URL}/auth`;// Endpoint de Auth
+const API_URL = `${BASE_URL}/web/auth`;// Endpoint de Auth
 
 export default class AuthService {
     

@@ -3,17 +3,30 @@ import MainLayout from "../../templates/MainLayout.js";
 import ProductDetailCard from "../../organisms/ProductDetailCard.js";
 import RelatedProducts from "../../organisms/RelatedProducts.js";
 import { useParams } from "react-router-dom";
-import { getCart, saveCart, updateCartCount, getProducts } from "../../../utils/CartUtils.js";
+import { getCart, saveCart, updateCartCount } from "../../../utils/CartUtils.js";
+import ProductServices from "../../../services/ProductServices.js";
 
 export default function DetalleProducto(){
   const { id } = useParams();
   const [product, setProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const storedProducts = getProducts();
+    const fetchProduct = async () => {
+      try {
+        setLoading(true);
+        const response = await ProductServices.getProductsById(id);
+        setProduct(response.data);
+      } catch (err) {
+        setError(err.message || 'Error al cargar el producto');
+        console.error('Error al cargar el producto:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const found = storedProducts.find((p) => p.id === parseInt(id));
-    setProduct(found);
+    fetchProduct();
   }, [id]);
 
   const handleAddToCart = (product, cantidad) => {
@@ -38,7 +51,28 @@ export default function DetalleProducto(){
     window.dispatchEvent(new Event("cart-updated"));
   };
 
-  if (!product) return <div className="text-center mt-5">Producto no encontrado.</div>;
+  if (loading) {
+    return (
+      <MainLayout>
+        <div className="text-center mt-5">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      </MainLayout>
+    );
+  }
+
+  if (error || !product) {
+    return (
+      <MainLayout>
+        <div className="text-center mt-5">
+          <h3>Producto no encontrado</h3>
+          <p>{error}</p>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -50,7 +84,7 @@ export default function DetalleProducto(){
             </div>
 
           <ProductDetailCard product={product} onAddToCart={handleAddToCart} />
-          <RelatedProducts />
+          <RelatedProducts currentProductId={product.id} category={product.category} />
         </div>
     </MainLayout>
   );

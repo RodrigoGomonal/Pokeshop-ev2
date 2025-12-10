@@ -42,7 +42,7 @@ export default function LoginForm() {
       }
       
       const usuario = response.usuario;
-      console.log("✅ Usuario autenticado:", usuario.nombre, "Tipo:", usuario.tipousuario_id);
+      console.log("Usuario autenticado:", usuario.nombre, "Tipo:", usuario.tipousuario_id);
       // Guardar el token (manejado dentro de AuthService.login o UserUtils)
       // y los datos del usuario en sessionStorage (o Context/Redux)
       setCurrentUser(usuario); 
@@ -70,7 +70,7 @@ export default function LoginForm() {
           navigate("/", { replace: true });
           break;
         default:
-          console.error("❌ Tipo de usuario no reconocido:", usuario.tipousuario_id);
+          console.error("Tipo de usuario no reconocido:", usuario.tipousuario_id);
           AuthService.logout();
           setErrores({
             correo: "Tipo de usuario no reconocido. Contacte a soporte.",
@@ -78,7 +78,7 @@ export default function LoginForm() {
           return;
       }
     } catch (error) {
-      console.error("❌ Error al iniciar sesión:", error);
+      console.error("Error al iniciar sesión:", error);
 
       let errorMessage = "Error al iniciar sesión. Intenta nuevamente.";
 

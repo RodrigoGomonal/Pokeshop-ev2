@@ -21,27 +21,27 @@ export default function ProductosSection() {
   }, []);
 
   useEffect(() => {
-  CategoryServices.getAllCategories()
-    .then((res) => {
-      setCategorias(res.data || []);
-    })
+    CategoryServices.getAllCategories()
+      .then((res) => {
+        setCategorias(res.data || []);
+      })
     .catch((err) => console.error("Error cargando categorías:", err));
   }, []);
 
   // crear un mapa id -> name usando useMemo para evitar recalculos innecesarios
   useEffect(() => {
-  CategoryServices.getAllCategories()
-    .then((res) => {
-      // Filtrar solo categorías activas
-      const categoriasActivas = (res.data || []).filter(
-        (cat) => cat && cat.active === true
-      );
-      const categoriasConTodas = [
-        { id: "Todas", name: "Todas" },
-        ...categoriasActivas,
-      ];
-      setCategorias(categoriasConTodas);
-    })
+    CategoryServices.getAllCategories()
+      .then((res) => {
+        // Filtrar solo categorías activas
+        const categoriasActivas = (res.data || []).filter(
+          (cat) => cat && cat.active === true
+        );
+        const categoriasConTodas = [
+          { id: "Todas", name: "Todas" },
+          ...categoriasActivas,
+        ];
+        setCategorias(categoriasConTodas);
+      })
     .catch((err) => console.error("Error cargando categorías:", err));
 }, []);
 

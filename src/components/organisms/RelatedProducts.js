@@ -1,29 +1,72 @@
-export default function RelatedProducts() {
-  const relacionados = [
-    { name: "Poción", image: "https://images.wikidexcdn.net/mwuploads/wikidex/f/fd/latest/20230115173615/Poci%C3%B3n_EP.png" },
-    { name: "Super Poción", image: "https://images.wikidexcdn.net/mwuploads/wikidex/1/1a/latest/20230115173819/Superpoci%C3%B3n_EP.png" },
-    { name: "Hiper Poción", image: "https://images.wikidexcdn.net/mwuploads/wikidex/7/76/latest/20230115173900/Hiperpoci%C3%B3n_EP.png" },
-    { name: "Poción Máxima", image: "https://images.wikidexcdn.net/mwuploads/wikidex/1/1b/latest/20230115181246/Poci%C3%B3n_m%C3%A1xima_EP.png" },
-    { name: "Restaura Todo", image: "https://images.wikidexcdn.net/mwuploads/wikidex/4/40/latest/20230115181348/Restaurar_todo_EP.png" },
-  ];
+import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom";
+import ProductServices from "../../services/ProductServices.js";
+
+export default function RelatedProducts({ currentProductId }) {
+  const [relacionados, setRelacionados] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchRelatedProducts = async () => {
+      try {
+        setLoading(true);
+        const response = await ProductServices.getProductsByCategId(currentProductId);
+        setRelacionados(response.data);
+      } catch (err) {
+        console.error('Error al cargar productos relacionados:', err);
+        setRelacionados([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (currentProductId) {
+      fetchRelatedProducts();
+    }
+  }, [currentProductId]);
+
+  if (loading) {
+    return (
+      <section className="container rounded-4 mb-5">
+        <h3 className="pb-3">Productos Relacionados</h3>
+        <div className="text-center">
+          <div className="spinner-border spinner-border-sm" role="status">
+            <span className="visually-hidden">Cargando...</span>
+          </div>
+        </div>
+      </section>
+    );
+  }
+
+  if (relacionados.length === 0) {
+    return (
+      <section className="container rounded-4 mb-5">
+        <h3 className="pb-3">Productos Relacionados</h3>
+        <p className="text-muted">No hay productos relacionados disponibles.</p>
+      </section>
+    );
+  }
 
   return (
     <section className="container rounded-4 mb-5">
       <h3 className="pb-3">Productos Relacionados</h3>
       <div className="row row-cols-1 row-cols-lg-5 row-cols-md-3 g-5 d-flex flex-nowrap overflow-x-auto">
-        {relacionados.map((prod, i) => (
-          <div className="col" key={i}>
-            <div className="card h-100 prod-card">
-              <img
-                src={prod.image}
-                className="card-img-top"
-                alt={prod.name}
-                style={{ height: "100px", objectFit: "contain" }}
-              />
-              <div className="card-body">
-                <h5 className="card-title text-center">{prod.name}</h5>
+        {relacionados.map((prod) => (
+          <div className="col" key={prod.id}>
+            <Link to={`/detalleProducto/${prod.id}`} className="text-decoration-none">
+              <div className="card h-100 prod-card">
+                <img
+                  src={prod.image}
+                  className="card-img-top"
+                  alt={prod.name}
+                  style={{ height: "100px", objectFit: "contain" }}
+                />
+                <div className="card-body">
+                  <h5 className="card-title text-center">{prod.name}</h5>
+                  <p className="text-center text-danger fw-bold">${prod.price} CLP</p>
+                </div>
               </div>
-            </div>
+            </Link>
           </div>
         ))}
       </div>
