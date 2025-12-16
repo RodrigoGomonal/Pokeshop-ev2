@@ -2,7 +2,7 @@ import AdminTitle from "../atoms/AdminTitle";
 import Icon from "../atoms/Icon";
 import '../../App.css';
 
-export default function AdHomeSection({ nombre, tipo }) {
+export default function VendHomeSection({ nombre }) {
   return (
     <div className=""
       style={{ 
@@ -21,7 +21,7 @@ export default function AdHomeSection({ nombre, tipo }) {
     }}
     >
       <div className="container d-flex justify-content-center align-items-center flex-column" style={{ minHeight: "90vh" }}>
-        <AdminTitle nombre={nombre} tipo={tipo}/>
+        <AdminTitle nombre={nombre} /> 
         <Icon width='250' height='250' />
       </div>
     </div>

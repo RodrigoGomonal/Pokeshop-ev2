@@ -2,7 +2,7 @@ import api from './AxiosConfig';
 
 const REGIONS_ENDPOINT = '/regiones';
 
-export default class Regionservices {
+export default class RegionServices {
 
     static getAllRegions() {
         return api.get(REGIONS_ENDPOINT);  

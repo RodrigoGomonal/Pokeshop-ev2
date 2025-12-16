@@ -1,53 +1,94 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "bootstrap";
-import { getUsers, saveUsers } from "../../utils/UserUtils";
+import DeleteUserModal from "./DeleteUserModal";
+import UpdateUserModal from "./UpdateUserModal";
+import AddUserModal from "./AddUserModal";
 import ButtonAction from "../atoms/ButtonAction";
 import SearchInput from "../atoms/SearchInput";
-import usersList from "../../data/Users.js";
+import UserServices from "../../services/UserServices";
+import RegionServices from "../../services/RegionServices";
+import CommuneServices from "../../services/CommuneServices";
+import UserTypeServices from "../../services/UserTypeServices";
 import "../../App.css";
 
 export default function UserTable() {
   const [search, setSearch] = useState("");
   const [users, setUsers] = useState([]);
+  const [regiones, setRegiones] = useState([]);
+  const [comunas, setComunas] = useState([]);
+  const [tiposUsuario, setTiposUsuario] = useState([]);
   const [pagina, setPagina] = useState(1);
   const [usuarioSeleccionado, setUsuarioSeleccionado] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   const usuariosPorPagina = 10;
 
-  // Cargar usuarios
+  // Cargar datos desde la BD
   useEffect(() => {
+    fetchUsers();
+    fetchRegiones();
+    fetchComunas();
+    fetchTiposUsuario();
+  }, []);
+
+  const fetchUsers = async () => {
     try {
-      const stored = localStorage.getItem("usersList");
-      if (stored) {
-        setUsers(JSON.parse(stored));
-      } else {
-        setUsers(usersList);
-        localStorage.setItem("usuarios", JSON.stringify(usersList));
-        
-      }
+      setLoading(true);
+      const response = await UserServices.getAllUsers();
+      setUsers(response.data);
+      setError(null);
     } catch (err) {
       console.error("Error cargando usuarios:", err);
-      setUsers(usersList);
+      setError("Error al cargar los usuarios");
+      setUsers([]);
+    } finally {
+      setLoading(false);
     }
-  }, []);
+  };
 
-  // Guardar en localStorage al cambiar
-  useEffect(() => {
-    if (users && users.length > 0) {
-      saveUsers(users);
+  const fetchRegiones = async () => {
+    try {
+      const response = await RegionServices.getAllRegions();
+      setRegiones(response.data || []);
+    } catch (err) {
+      console.error("Error cargando regiones:", err);
     }
-  }, [users]);
+  };
 
-  // Escuchar cambios globales
-  useEffect(() => {
-    const actualizar = () => {
-      const nuevos = getUsers();
-      setUsers(nuevos);
-      setPagina(1);
-    };
-    window.addEventListener("users-updated", actualizar);
-    return () => window.removeEventListener("users-updated", actualizar);
-  }, []);
+  const fetchComunas = async () => {
+    try {
+      const response = await CommuneServices.getAllCommunes();
+      setComunas(response.data || []);
+    } catch (err) {
+      console.error("Error cargando comunas:", err);
+    }
+  };
+
+  const fetchTiposUsuario = async () => {
+    try {
+      const response = await UserTypeServices.getAllUserTypes();
+      setTiposUsuario(response.data || []);
+    } catch (err) {
+      console.error("Error cargando tipos de usuario:", err);
+    }
+  };
+
+  // Obtener nombres por ID
+  const getRegionName = (regionId) => {
+    const region = regiones.find(r => r.id === regionId);
+    return region?.name || `ID: ${regionId}`;
+  };
+
+  const getComunaName = (comunaId) => {
+    const comuna = comunas.find(c => c.id === comunaId);
+    return comuna?.name || `ID: ${comunaId}`;
+  };
+
+  const getTipoUsuarioName = (tipoId) => {
+    const tipo = tiposUsuario.find(t => t.id === tipoId);
+    return tipo?.name || "Usuario";
+  };
 
   // Filtro de búsqueda
   const filtrados = users.filter((u) => {
@@ -66,6 +107,83 @@ export default function UserTable() {
     );
   });
 
+  // Función para cerrar modal correctamente
+  const closeModal = (modalId) => {
+    const modalEl = document.getElementById(modalId);
+    if (modalEl) {
+      const modalInstance = Modal.getInstance(modalEl);
+      if (modalInstance) {
+        modalInstance.hide();
+      }
+      
+      setTimeout(() => {
+        document.querySelectorAll('.modal-backdrop').forEach(backdrop => backdrop.remove());
+        document.body.classList.remove('modal-open');
+        document.body.style.overflow = '';
+        document.body.style.paddingRight = '';
+        modalEl.classList.remove('show');
+        modalEl.style.display = 'none';
+        modalEl.setAttribute('aria-hidden', 'true');
+        modalEl.removeAttribute('aria-modal');
+      }, 150);
+    }
+  };
+
+  // ---- AGREGAR ----
+  const handleOpenAdd = () => {
+    const modal = new Modal(document.getElementById("ModalAgregarUsuario"));
+    modal.show();
+  };
+
+  const handleAdd = async (nuevoUsuario) => {
+    try {
+      await UserServices.createUser(nuevoUsuario);
+      console.log("Usuario agregado:", nuevoUsuario);
+      closeModal("ModalAgregarUsuario");
+      await fetchUsers();
+      setPagina(1);
+    } catch (err) {
+      console.error("Error al agregar usuario:", err);
+      alert("Error al agregar el usuario: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  // ---- ELIMINAR ----
+  const handleOpenDelete = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    const modal = new Modal(document.getElementById("ModalEliminarUsuario"));
+    modal.show();
+  };
+
+  const handleDelete = async (rut) => {
+    try {
+      await UserServices.deleteUser(rut);
+      closeModal("ModalEliminarUsuario");
+      await fetchUsers();
+    } catch (err) {
+      console.error("Error al eliminar usuario:", err);
+      alert("Error al eliminar el usuario: " + (err.response?.data?.message || err.message));
+    }
+  };
+
+  // ---- ACTUALIZAR ----
+  const handleOpenUpdate = (usuario) => {
+    setUsuarioSeleccionado(usuario);
+    const modal = new Modal(document.getElementById("ModalActualizarUsuario"));
+    modal.show();
+  };
+
+  const handleUpdate = async (usuarioActualizado) => {
+    try {
+      await UserServices.updateUser(usuarioActualizado.rut, usuarioActualizado);
+      closeModal("ModalActualizarUsuario");
+      await fetchUsers();
+    } catch (err) {
+      console.error("Error al actualizar usuario:", err);
+      alert("Error al actualizar el usuario: " + (err.response?.data?.message || err.message));
+    }
+  };
+
   // Paginación
   const totalPaginas = Math.ceil(filtrados.length / usuariosPorPagina);
   const usuariosPaginados = filtrados.slice(
@@ -76,19 +194,24 @@ export default function UserTable() {
   const siguiente = () => { if (pagina < totalPaginas) setPagina(pagina + 1); };
   const anterior = () => { if (pagina > 1) setPagina(pagina - 1); };
 
-  // ---- ELIMINAR ----
-  const handleOpenDelete = (usuario) => {
-    setUsuarioSeleccionado(usuario);
-    const modal = new Modal(document.getElementById("ModalEliminarUsuario"));
-    modal.show();
-  };
-  const handleDelete = (rut) => {
-    const actualizados = users.filter((u) => u.rut !== rut);
-    localStorage.setItem("usuarios", JSON.stringify(actualizados));
-    setUsers(actualizados);
-    const modal = Modal.getInstance(document.getElementById("ModalEliminarUsuario"));
-    modal.hide();
-  };
+  if (loading) {
+    return (
+      <div className="text-center mt-5">
+        <div className="spinner-border" role="status">
+          <span className="visually-hidden">Cargando...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="alert alert-danger" role="alert">
+        {error}
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
@@ -96,7 +219,7 @@ export default function UserTable() {
           icon="bi-person-plus-fill"
           label="Agregar Usuario"
           variant="success"
-          onClick={() => alert("Abrir modal de agregar usuario (por implementar)")}
+          onClick={handleOpenAdd}
         />
         <SearchInput
           placeholder="Buscar por RUT, nombre o correo"
@@ -123,33 +246,50 @@ export default function UserTable() {
           </thead>
           <tbody>
             {usuariosPaginados.map((u) => (
-              <tr>
+              <tr key={u.rut}>
                 <td>{u.rut}</td>
                 <td>{u.nombre} {u.apellidos}</td>
                 <td>{u.correo}</td>
                 <td>{u.telefono || "—"}</td>
-                <td>{u.region}</td>
-                <td>{u.comuna}</td>
                 <td>
-                  {u.tipo_usuario === 1 ? "Administrador" : u.tipo_usuario === 2 ? "Encargado" : "Usuario"}
-                </td>
-                <td>
-                  <span className={`px-3 py-1 rounded ${
-                      u.activo ? "bg-success text-white" : "bg-danger text-white"
-                    }`}
-                  >
-                    {u.activo ? "Activo" : "Inactivo"}
+                  <span className="badge bg-info text-dark">
+                    {getRegionName(u.region_id)}
                   </span>
                 </td>
                 <td>
-                  <button className="btn btn-sm btn-outline-primary"
-                    //onClick={ }
+                  <span className="badge bg-info text-dark">
+                    {getComunaName(u.comuna_id)}
+                  </span>
+                </td>
+                <td>
+                  <span className={`badge ${
+                    u.tipousuario_id === 1 ? 'bg-primary' : 
+                    u.tipousuario_id === 2 ? 'bg-warning text-dark' : 
+                    'bg-secondary'
+                  }`}>
+                    {getTipoUsuarioName(u.tipousuario_id)}
+                  </span>
+                </td>
+                <td>
+                  <span className={`px-3 py-1 rounded ${
+                    u.active ? "bg-success text-white" : "bg-danger text-white"
+                  }`}>
+                    {u.active ? "Activo" : "Inactivo"}
+                  </span>
+                </td>
+                <td>
+                  <button 
+                    className="btn btn-sm btn-outline-primary"
+                    onClick={() => handleOpenUpdate(u)}
                   >
                     <i className="bi bi-pencil"></i>
                   </button>
                 </td>
                 <td>
-                  <button className="btn btn-sm btn-outline-danger" onClick={() => handleOpenDelete(u)}>
+                  <button 
+                    className="btn btn-sm btn-outline-danger" 
+                    onClick={() => handleOpenDelete(u)}
+                  >
                     <i className="bi bi-trash"></i>
                   </button>
                 </td>
@@ -170,12 +310,20 @@ export default function UserTable() {
       <nav className="mt-4">
         <ul className="pagination justify-content-center">
           <li className="page-item">
-            <button className="btn btn-outline-primary" disabled={pagina === 1} onClick={anterior}>
+            <button 
+              className="btn btn-outline-primary" 
+              disabled={pagina === 1} 
+              onClick={anterior}
+            >
               <i className="bi bi-arrow-left"></i> Anterior
             </button>
           </li>
           <li className="page-item ms-3">
-            <button className="btn btn-primary" disabled={pagina === totalPaginas} onClick={siguiente}>
+            <button 
+              className="btn btn-primary" 
+              disabled={pagina === totalPaginas} 
+              onClick={siguiente}
+            >
               Siguiente <i className="bi bi-arrow-right"></i>
             </button>
           </li>
@@ -185,26 +333,23 @@ export default function UserTable() {
         </p>
       </nav>
 
-      {/* Modales (placeholders por ahora) */}
-      <div className="modal fade" id="ModalEliminarUsuario" tabIndex="-1" aria-hidden="true">
-        <div className="modal-dialog modal-dialog-centered">
-          <div className="modal-content p-3">
-            <h5>¿Eliminar usuario?</h5>
-            <p>
-              Se eliminará a <strong>{usuarioSeleccionado?.nombre}</strong>.
-            </p>
-            <div className="d-flex justify-content-end gap-2">
-              <button className="btn btn-secondary" data-bs-dismiss="modal">
-                Cancelar
-              </button>
-              <button className="btn btn-danger"
-                onClick={() => handleDelete(usuarioSeleccionado?.rut)}>
-                Eliminar
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <DeleteUserModal 
+        usuario={usuarioSeleccionado} 
+        onDelete={() => handleDelete(usuarioSeleccionado?.rut)}
+      />
+      <UpdateUserModal 
+        usuario={usuarioSeleccionado}
+        regiones={regiones}
+        comunas={comunas}
+        tiposUsuario={tiposUsuario}
+        onUpdate={handleUpdate}
+      />
+      <AddUserModal 
+        regiones={regiones}
+        comunas={comunas}
+        tiposUsuario={tiposUsuario}
+        onAdd={handleAdd} 
+      />
     </>
   );
 }

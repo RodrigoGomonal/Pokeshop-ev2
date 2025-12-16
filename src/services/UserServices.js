@@ -9,6 +9,10 @@ export default class UserServices {
         return api.get(USERS_ENDPOINT); 
     }
 
+    static getUsersByRut(rut) {
+        return api.get(`${USERS_ENDPOINT}/rut/${rut}`);
+    }
+
     static getUsersById(id) {
         return api.get(`${USERS_ENDPOINT}/${id}`);
     }

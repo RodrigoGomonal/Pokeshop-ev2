@@ -29,28 +29,31 @@ export default function LoginForm() {
     }
 
     try {
-      // 🔑 CAMBIO CLAVE: Llamada al servicio de autenticación.
-      // 1. Envía el correo y la contraseña al backend.
-      // 2. El backend verifica las credenciales y devuelve un objeto que contiene:
-      //    a) token (JWT)
-      //    b) usuario (datos como id, nombre, tipoUsuario_id, etc.)
+      // --- LÓGICA DE AUTENTICACIÓN ---
+      // El backend verifica las credenciales y devuelve un objeto que contiene: token y datos del usuario.
       const response = await AuthService.login(correo, pass);
 
       // Verificamos si la respuesta contiene los datos esperados
       if (!response.token || !response.usuario) {
          throw new Error("Respuesta de API incompleta.");
       }
-      
       const usuario = response.usuario;
       console.log("Usuario autenticado:", usuario.nombre, "Tipo:", usuario.tipousuario_id);
-      // Guardar el token (manejado dentro de AuthService.login o UserUtils)
-      // y los datos del usuario en sessionStorage (o Context/Redux)
+      
+      // Verificar si la cuenta está activa
+      if (!usuario.active) {
+        setErrores({
+          correo: "Cuenta desactivada. Contactese con soporte.",
+        });
+        AuthService.logout();
+        setLoading(false);
+        return;
+      }
+      // Guardar usuario en almacenamiento local
       setCurrentUser(usuario); 
-      // NOTA: AuthService.login debería ser responsable de guardar el response.token en localStorage/sessionStorage.
 
       // --- LÓGICA DE REDIRECCIÓN ---
-      
-      // Verificar si hay redirección pendiente
+      // Verificar si hay redirección pendiente, esta funcion la utiliza el carrito.
       const redirectUrl = localStorage.getItem("redirectAfterLogin");
       if (redirectUrl) {
         localStorage.removeItem("redirectAfterLogin");
@@ -59,7 +62,7 @@ export default function LoginForm() {
       }
 
       // Redirigir según tipo de usuario
-      switch (usuario.tipousuario_id ) {
+      switch (usuario.tipousuario_id) {
         case 1: // Admin
           navigate("/admin/home", { replace: true });
           break;
@@ -85,13 +88,16 @@ export default function LoginForm() {
       // Manejo de errores específicos
       if (error.response) {
         switch (error.response.status) {
-          case 401:
+          case 401: // Credenciales inválidas
             errorMessage = "Correo o contraseña incorrectos.";
             break;
-          case 404:
+          case 403: // Cuenta desactivada
+            errorMessage = error.response.data?.message || "Tu cuenta está desactivada.";
+            break;
+          case 404: // Usuario no encontrado
             errorMessage = "Usuario no encontrado.";
             break;
-          case 500:
+          case 500: // Error del servidor
             errorMessage = "Error del servidor. Intenta más tarde.";
             break;
           default:

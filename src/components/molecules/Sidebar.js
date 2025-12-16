@@ -17,18 +17,18 @@ export default function AdminSidebar() {
   };
 
   useEffect(() => {
-    // ✅ Usar AuthService en lugar de sessionStorage
+    // Verificar usuario autenticado y su rol
     const usuarioActivo = AuthService.getCurrentUser();
-    
+    // Si no hay usuario, redirigir al login
     if (!usuarioActivo) {
-      console.log("❌ No hay usuario en AdminSidebar");
+      console.log("Cuenta de usuario no encontrada");
       navigate("/login", { replace: true });
       return;
     }
 
-    // Verificar que sea admin y esté activo
-    if (usuarioActivo.tipousuario_id !== 1) {
-      console.log("❌ Usuario no es admin en AdminSidebar");
+    // Verificar que sea admin o vendedor y esté activo
+    if (usuarioActivo.tipousuario_id !== 1 && usuarioActivo.tipousuario_id !== 2) {
+      console.log("Usuario no es admin o vendedor");
       alert("Acceso denegado");
       AuthService.logout();
       navigate("/login", { replace: true });
@@ -36,18 +36,18 @@ export default function AdminSidebar() {
     }
 
     if (!usuarioActivo.active) {
-      console.log("❌ Usuario inactivo en AdminSidebar");
+      console.log("Cuenta de usuario desactivada");
       alert("Cuenta desactivada");
       AuthService.logout();
       navigate("/login", { replace: true });
       return;
     }
-    console.log("✅ Usuario cargado en AdminSidebar:", usuarioActivo.nombre);
+    console.log("Usuario cargado:", usuarioActivo.nombre);
     setUsuario(usuarioActivo);
   }, [navigate]);
 
   const handleLogout = () => {
-    AuthService.logout(); // ✅ Usar AuthService
+    AuthService.logout(); // Usar AuthService
     navigate("/", { replace: true });
   };
   
@@ -61,11 +61,22 @@ export default function AdminSidebar() {
         <Logo alt="Logo PokeShop" className="img-fluid mb-3 text-white"/>
 
         <hr />
-        <ul className="nav nav-pills flex-column mb-auto">
-          <SidebarLink href="/admin/home" icon="bi-house-fill" label="Home" />
-          <SidebarLink href="/admin/inventario" icon="bi-box2-fill" label="Inventario" />
-          <SidebarLink href="/admin/userlist" icon="bi-person-fill-gear" label="Usuarios" />
-        </ul>
+        {/* Links de Admin - Solo se muestran si es Admin */}
+        {usuario.tipousuario_id === 1 && (
+          <ul className="nav nav-pills flex-column mb-auto">
+            <SidebarLink href="/admin/home" icon="bi-house-fill" label="Home" />
+            <SidebarLink href="/admin/inventario" icon="bi-box2-fill" label="Inventario" />
+            <SidebarLink href="/admin/userlist" icon="bi-person-fill-gear" label="Usuarios" />
+          </ul>
+        )}
+        
+        {/* Links de Vendedor - Solo se muestran si es Vendedor */}
+        {usuario.tipousuario_id === 2 && (
+          <ul className="nav nav-pills flex-column mb-auto">
+            <SidebarLink href="/vendedor/home" icon="bi-house-fill" label="Home" />
+            <SidebarLink href="/vendedor/inventario" icon="bi-box2-fill" label="Inventario" />
+          </ul>
+        )}
         <hr />
 
         <div className={`dropdown ${isOpen ? 'show' : ''}`}>

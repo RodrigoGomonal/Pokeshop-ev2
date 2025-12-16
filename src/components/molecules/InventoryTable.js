@@ -7,6 +7,7 @@ import ButtonAction from "../atoms/ButtonAction";
 import SearchInput from "../atoms/SearchInput";
 import ProductServices from "../../services/ProductServices";
 import CategoryServices from "../../services/CategoryServices";
+import AuthService from "../../services/AuthService";
 import '../../App.css';
 
 export default function InventoryTable() {
@@ -102,14 +103,30 @@ export default function InventoryTable() {
       }, 150);
     }
   };
-  
+  // Solo mostrar botones de acción si es Admin
+  // Aquí se asume que hay una función o variable que indica si el usuario es admin
+  const esAdmin = (() => {
+    const usuarioActual = AuthService.getCurrentUser();
+    return usuarioActual && usuarioActual.tipousuario_id === 1;
+  })();
+  // Acciones de los botones que abren los modales y manejan CRUD
+
   // ---- AGREGAR ----
+  // Abrir modal de agregar
   const handleOpenAdd = () => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden agregar productos");
+      return;
+    }
     const modal = new Modal(document.getElementById("ModalAgregar"));
     modal.show();
   };
-
+  // Agregar producto
   const handleAdd = async (nuevoProducto) => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden agregar productos");
+      return;
+    }
     try {
       await ProductServices.createProduct(nuevoProducto);
       closeModal("ModalAgregar");
@@ -122,13 +139,22 @@ export default function InventoryTable() {
   };
 
   // ---- ELIMINAR ----
+  // Abrir modal de eliminar
   const handleOpenDelete = (producto) => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden eliminar productos");
+      return;
+    }
     setProductoSeleccionado(producto);
     const modal = new Modal(document.getElementById("ModalEliminar"));
     modal.show();
   };
-
+  // Eliminar producto
   const handleDelete = async (id) => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden eliminar productos");
+      return;
+    }
     try {
       await ProductServices.deleteProduct(id);
       closeModal("ModalEliminar");
@@ -140,13 +166,22 @@ export default function InventoryTable() {
   };
 
   // ---- ACTUALIZAR ----
+  // Abrir modal de actualizar
   const handleOpenUpdate = (producto) => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden editar productos");
+      return;
+    }
     setProductoSeleccionado(producto);
     const modal = new Modal(document.getElementById("ModalActualizar"));
     modal.show();
   };
-
+  // Actualizar producto
   const handleUpdate = async (productoActualizado) => {
+    if (!esAdmin) {
+      alert("Solo los administradores pueden editar productos");
+      return;
+    }
     try {
       await ProductServices.updateProduct(productoActualizado.id, productoActualizado);
       closeModal("ModalActualizar");
@@ -181,16 +216,18 @@ export default function InventoryTable() {
       </div>
     );
   }
-
   return (
     <>
       <div className="d-flex justify-content-between align-items-center mb-3">
-        <ButtonAction 
-          icon="bi-plus-lg" 
-          label="Agregar Producto" 
-          variant="success" 
-          onClick={handleOpenAdd}
-        />
+        { /* Boton de Agregar - Solo Admin*/ }
+        {esAdmin && (
+          <ButtonAction 
+            icon="bi-plus-lg" 
+            label="Agregar Producto" 
+            variant="success" 
+            onClick={handleOpenAdd}
+          />
+        )}
         <SearchInput 
           placeholder="Buscar por ID o nombre" 
           value={search} 
@@ -201,19 +238,31 @@ export default function InventoryTable() {
       <div className="table-responsive shadow-sm rounded">
         <table className="table table-hover align-middle">
           <thead className="table-primary">
-            <tr>
-              <th>ID</th>
-              <th>Imagen</th>
-              <th>Nombre</th>
-              <th>Categoría</th>
-              <th>Precio uds(CLP)</th>
-              <th>Precio Total(CLP)</th>
-              <th>Stock Actual</th>
-              <th>Stock Crítico</th>
-              <th>Estado</th>
-              <th>Editar</th>
-              <th>Eliminar</th>
-            </tr>
+            {esAdmin && ( 
+              <tr>
+                <th>ID</th>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio uds(CLP)</th>
+                <th>Precio Total(CLP)</th>
+                <th>Stock Actual</th>
+                <th>Stock Crítico</th>
+                <th>Estado</th>
+                <th>Editar</th>
+                <th>Eliminar</th>
+              </tr>
+            )}
+            {!esAdmin && ( 
+              <tr>
+                <th>ID</th>
+                <th>Imagen</th>
+                <th>Nombre</th>
+                <th>Categoría</th>
+                <th>Precio uds(CLP)</th>
+                <th>Stock Actual</th>
+              </tr>
+            )}
           </thead>
           <tbody>
             {productosPaginados.map((p) => {
@@ -221,9 +270,11 @@ export default function InventoryTable() {
               
               return (
                 <tr key={p.id} className="hover:bg-gray-50 transition duration-150">
+                  { /* ID del producto */ }
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     {p.id}
                   </td>
+                  { /* Imagen del producto con manejo de error */ }
                   <td className="px-6 py-4 whitespace-nowrap">
                     <img 
                       src={p.image} 
@@ -235,41 +286,55 @@ export default function InventoryTable() {
                       }}
                     />
                   </td>
+                  { /* Nombre */ }
                   <td>{p.name}</td>
+                  { /* Categoría */ }
                   <td>
                     <span className="badge bg-info text-dark">
                       {getCategoryName(p.category_id)}
                     </span>
                   </td>
+                  { /* Precio por unidad y total */ }
                   <td>${Number(p.price).toLocaleString('es-CL')}</td>
-                  <td>${(Number(p.price) * Number(p.stock_actual)).toLocaleString('es-CL')}</td>
+                  {esAdmin && ( <td>${(Number(p.price) * Number(p.stock_actual)).toLocaleString('es-CL')}</td> )}
+                  
+                  { /* Stock actual con color según nivel */ }
                   <td>
                     <span className={`px-3 py-1 rounded ${stockColorClass}`}>
                       {p.stock_actual}
                     </span>
-                  </td>
-                  <td>{p.stock_critico}</td>
-                  <td>
-                    <span className={`px-3 py-1 rounded ${p.active ? 'bg-success text-white' : 'bg-danger text-white'}`}>
-                      {p.active ? "Activo" : "Inactivo"}
-                    </span>
-                  </td>
-                  <td>
-                    <button 
-                      className="btn btn-sm btn-outline-primary me-2" 
-                      onClick={() => handleOpenUpdate(p)}
-                    >
-                      <i className="bi bi-pencil"></i>
-                    </button>
-                  </td>
-                  <td>
-                    <button 
-                      className="btn btn-sm btn-outline-danger" 
-                      onClick={() => handleOpenDelete(p)}
-                    >
-                      <i className="bi bi-trash"></i>
-                    </button>
-                  </td>
+                  </td>       
+                  {esAdmin && ( <td>{p.stock_critico}</td> )}
+                  { /* Estado activo/inactivo */ }
+                  {esAdmin && ( 
+                    <td>
+                      <span className={`px-3 py-1 rounded ${p.active ? 'bg-success text-white' : 'bg-danger text-white'}`}>
+                        {p.active ? "Activo" : "Inactivo"}
+                      </span>
+                    </td>
+                  )}
+                  
+                  { /* Botones de Editar y Eliminar - Solo Admin*/ }
+                  {esAdmin && (
+                    <td>
+                      <button 
+                        className="btn btn-sm btn-outline-primary me-2" 
+                        onClick={() => handleOpenUpdate(p)}
+                      >
+                        <i className="bi bi-pencil"></i>
+                      </button>
+                    </td>
+                  )}
+                  {esAdmin && (
+                    <td>
+                      <button 
+                        className="btn btn-sm btn-outline-danger" 
+                        onClick={() => handleOpenDelete(p)}
+                      >
+                        <i className="bi bi-trash"></i>
+                      </button>
+                    </td>
+                  )}
                 </tr>
               );
             })}
@@ -311,16 +376,20 @@ export default function InventoryTable() {
           Página {pagina} de {totalPaginas || 1}
         </p> 
       </nav>
-
-      <DeletProdModal 
-        producto={productoSeleccionado} 
-        onDelete={() => handleDelete(productoSeleccionado?.id)}
-      />
-      <UpdateProductModal 
-        producto={productoSeleccionado} 
-        onUpdate={handleUpdate}
-      />
-      <AddProductModal onAdd={handleAdd} />
+      {/* Modales de Agregar, Editar y Eliminar - Solo Admin*/}
+      {esAdmin && (
+        <>
+          <DeletProdModal 
+            producto={productoSeleccionado} 
+            onDelete={() => handleDelete(productoSeleccionado?.id)}
+          />
+          <UpdateProductModal 
+            producto={productoSeleccionado} 
+            onUpdate={handleUpdate}
+          />
+          <AddProductModal onAdd={handleAdd} />
+        </>
+      )}
     </>
   );
 }

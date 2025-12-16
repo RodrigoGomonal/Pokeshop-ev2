@@ -1,10 +1,10 @@
 import AdminLayout from "../../templates/AdminLayout";
-import UserListSection from "../../organisms/UserListSection";
+import VendInventorySection from "../../organisms/InventorySection";
 
 export default function AdminInventory() {
   return (
     <AdminLayout>
-        <UserListSection />
+      <VendInventorySection />
     </AdminLayout>
   );
 }

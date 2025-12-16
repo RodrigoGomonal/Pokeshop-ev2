@@ -1,4 +1,3 @@
-import { Modal } from "bootstrap";
 import { useState, useEffect } from "react";
 import CategoryServices from "../../services/CategoryServices";
 
@@ -65,7 +64,7 @@ export default function AddProductModal({ onAdd }) {
     try {
       await onAdd(productoParaEnviar);
 
-      // Cerrar modal correctamente
+      /* // Cerrar modal correctamente
       const modalEl = document.getElementById("ModalAgregar");
       const modalInstance = Modal.getInstance(modalEl) || new Modal(modalEl);
       modalInstance.hide();
@@ -79,7 +78,7 @@ export default function AddProductModal({ onAdd }) {
         document.body.classList.remove('modal-open');
         document.body.style.removeProperty('overflow');
         document.body.style.removeProperty('padding-right');
-      }, 300);
+      }, 300); */
 
       // Limpia los campos
       setNuevoProducto({
@@ -90,11 +89,10 @@ export default function AddProductModal({ onAdd }) {
         description: "",
         stock_actual: "",
         stock_critico: "",
-        active: true,
+        active: false,
       });
     } catch (err) {
       console.error("Error al guardar:", err);
-      alert("Error al guardar el producto");
     } finally {
       setLoading(false);
     }

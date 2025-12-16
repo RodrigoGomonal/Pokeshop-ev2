@@ -16,9 +16,20 @@ export default function Navbar() {
 
   useEffect(() => {
     updateCartCount();
-
-    // Cargar usuario actual
-    setUsuarioActivo(getCurrentUser());
+    // Cargar y validar usuario actual
+    const usuario = getCurrentUser();
+    // Si el usuario está activo, mantener la sesión; si no, cerrar sesión automáticamente
+    if (usuario && usuario.active) {
+      setUsuarioActivo(usuario);
+    } else if (usuario && !usuario.active) {
+      // Si el usuario está desactivado, cerrar sesión automáticamente
+      console.warn("Cuenta desactivada detectada, cerrando sesión...");
+      AuthService.logout();
+      logout();
+      setUsuarioActivo(null);
+    } else {
+      setUsuarioActivo(null);
+    }
 
     // Escuchar eventos de login/logout
     const handleLogin = () => {
@@ -42,6 +53,7 @@ export default function Navbar() {
     try {
       await AuthService.logout();
       logout();
+      setUsuarioActivo(null);
       navigate("/");
       console.log("Sesión cerrada correctamente.");
     } catch (error) {

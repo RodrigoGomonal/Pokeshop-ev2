@@ -1,4 +1,3 @@
-// src/components/pages/Admin/Home.js
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdminLayout from "../../templates/AdminLayout";
@@ -30,16 +29,16 @@ export default function Home() {
         }
 
         // 3. Verificar que sea administrador (tipousuario_id === 1)
-        if (usuarioActual.tipousuario_id !== 1) {
-          console.log("Usuario no es administrador:", usuarioActual);
-          alert("Acceso denegado. Esta área es solo para administradores.");
+        if (usuarioActual.tipousuario_id !== 2) {
+          console.log("Usuario no es vendedor:", usuarioActual);
+          alert("Acceso denegado. Esta área es solo para vendedor.");
           AuthService.logout();
           navigate("/Login", { replace: true });
           return;
         }
 
-        // 4. Usuario válido y es admin
-        console.log("Acceso autorizado para admin:", usuarioActual.nombre);
+        // 4. Usuario válido y es vendedor
+        console.log("Acceso autorizado para vendedor:", usuarioActual.nombre);
         setUsuario(usuarioActual);
         setCargando(false);
 
@@ -52,7 +51,6 @@ export default function Home() {
     const redirigirALogin = (mensaje) => {
       console.log(mensaje);
       AuthService.logout(); // Limpia localStorage
-      sessionStorage.clear(); // Limpia sessionStorage viejo
       navigate("/Login", { replace: true });
     };
     verificarAccesoAdmin();
@@ -95,7 +93,7 @@ export default function Home() {
 
   return (
     <AdminLayout>
-      <AdHomeSection nombre={usuario.nombre} />
+      <AdHomeSection nombre={usuario.nombre} tipo={usuario.tipousuario_id}/>
     </AdminLayout>
   );
 }
