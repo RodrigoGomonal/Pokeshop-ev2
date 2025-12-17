@@ -67,6 +67,7 @@ export default function AdminSidebar() {
             <SidebarLink href="/admin/home" icon="bi-house-fill" label="Home" />
             <SidebarLink href="/admin/inventario" icon="bi-box2-fill" label="Inventario" />
             <SidebarLink href="/admin/userlist" icon="bi-person-fill-gear" label="Usuarios" />
+            <SidebarLink href="/admin/boletas" icon="bi-receipt-cutoff" label="Boletas" />
           </ul>
         )}
         

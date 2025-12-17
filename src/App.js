@@ -15,6 +15,7 @@ import Contacto from './components/pages/Shop/Contacto';
 import AdHome from './components/pages/Admin/Home';
 import Inventory from './components/pages/Admin/Inventory';
 import UserList from './components/pages/Admin/UserList';
+import Boletas from './components/pages/Admin/Boletas';
 // Páginas de vendedor
 import VendHome from './components/pages/Vendedor/Home';
 import VendInventory from './components/pages/Vendedor/Inventory';
@@ -42,6 +43,7 @@ export default function App() {
           <Route path="/admin/home" element={<AdHome />} />
           <Route path="/admin/inventario" element={<Inventory />} />
           <Route path="/admin/userlist" element={<UserList />} />
+          <Route path="/admin/boletas" element={<Boletas />} />
           {/* Vendedor */}
           <Route path="/vendedor/home" element={<VendHome />} />
           <Route path="/vendedor/inventario" element={<VendInventory />} />

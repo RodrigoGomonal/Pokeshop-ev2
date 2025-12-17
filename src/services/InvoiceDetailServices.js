@@ -1,3 +1,4 @@
+// src/services/InvoiceDetailServices.js
 import api from './AxiosConfig'; 
 
 const INVOICE_DETAIL_ENDPOINT = '/boletadetalle';
@@ -10,6 +11,10 @@ export default class InvoiceDetailServices {
 
     static getInvoiceDetailById(id) {
         return api.get(`${INVOICE_DETAIL_ENDPOINT}/${id}`);
+    }
+    
+    static getInvoiceById(id) {
+        return api.get(`${INVOICE_DETAIL_ENDPOINT}/boleta/${id}`);
     }
 
     static createInvoiceDetail(detail) {
