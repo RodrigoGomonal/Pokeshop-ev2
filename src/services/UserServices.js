@@ -25,7 +25,7 @@ export default class UserServices {
         return api.put(`${USERS_ENDPOINT}/${id}`, user);
     }
 
-    static deleteUser(id) {
+    static deleteUserById(id) {
         return api.delete(`${USERS_ENDPOINT}/${id}`);
     }
 

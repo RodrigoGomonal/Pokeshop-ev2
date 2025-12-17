@@ -1,9 +1,29 @@
-import React, { useState } from "react";
+import React, { useEffect ,useState } from "react";
 import QuantitySelector from "../molecules/QuantitySelector";
 import ButtonAction from "../atoms/ButtonAction";
+import CategoryServices from "../../services/CategoryServices.js";
 
 export default function ProductDetailCard({ product, onAddToCart }) {
   const [cantidad, setCantidad] = useState(1);
+  const [categoryName, setCategoryName] = useState("Cargando...");
+
+  useEffect(() => {
+    const fetchCategory = async () => {
+      try {
+        if (product?.category_id) {
+          const response = await CategoryServices.getCategoriesById(product.category_id);
+          setCategoryName(response.data.name);
+        } else {
+          setCategoryName("Sin categoría");
+        }
+      } catch (error) {
+        console.error("Error al cargar la categoría:", error);
+        setCategoryName("Categoría no disponible");
+      }
+    };
+
+    fetchCategory();
+  }, [product?.category_id]);
 
   if (!product) return <p>Producto no encontrado.</p>;
 
@@ -37,7 +57,7 @@ export default function ProductDetailCard({ product, onAddToCart }) {
         </div>
         <div className="col-md-6">
           <h2>{product.name}</h2>
-          <p className="text-muted">Categoría: {product.category}</p>
+          <p className="text-muted">Categoría: {categoryName}</p>
           <h4 className="text-danger">${product.price} CLP</h4>
           <p>{product.description || "Sin descripción disponible"}</p>
           <div className="row mt-5"> 

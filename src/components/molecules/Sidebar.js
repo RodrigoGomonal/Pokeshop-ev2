@@ -76,6 +76,7 @@ export default function AdminSidebar() {
           <ul className="nav nav-pills flex-column mb-auto">
             <SidebarLink href="/vendedor/home" icon="bi-house-fill" label="Home" />
             <SidebarLink href="/vendedor/inventario" icon="bi-box2-fill" label="Inventario" />
+            <SidebarLink href="/admin/boletas" icon="bi-receipt-cutoff" label="Boletas" />
           </ul>
         )}
         <hr />

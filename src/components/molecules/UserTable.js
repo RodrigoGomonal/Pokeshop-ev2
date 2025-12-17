@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "bootstrap";
-import DeleteUserModal from "./DeleteUserModal";
+import DeleteModal from "./DeleteModal";
 import UpdateUserModal from "./UpdateUserModal";
 import AddUserModal from "./AddUserModal";
 import ButtonAction from "../atoms/ButtonAction";
@@ -151,14 +151,14 @@ export default function UserTable() {
   // ---- ELIMINAR ----
   const handleOpenDelete = (usuario) => {
     setUsuarioSeleccionado(usuario);
-    const modal = new Modal(document.getElementById("ModalEliminarUsuario"));
+    const modal = new Modal(document.getElementById("ModalEliminar"));
     modal.show();
   };
 
-  const handleDelete = async (rut) => {
+  const handleDelete = async (id) => {
     try {
-      await UserServices.deleteUser(rut);
-      closeModal("ModalEliminarUsuario");
+      await UserServices.deleteUserById(id);
+      closeModal("ModalEliminar");
       await fetchUsers();
     } catch (err) {
       console.error("Error al eliminar usuario:", err);
@@ -332,10 +332,11 @@ export default function UserTable() {
           Página {pagina} de {totalPaginas || 1}
         </p>
       </nav>
-
-      <DeleteUserModal 
-        usuario={usuarioSeleccionado} 
-        onDelete={() => handleDelete(usuarioSeleccionado?.rut)}
+      {/* Modales de Agregar, Editar y Eliminar */}
+      <DeleteModal 
+        titulo="Eliminar usuario"
+        nombre={usuarioSeleccionado?.nombre}
+        onDelete={() => handleDelete(usuarioSeleccionado?.id)}
       />
       <UpdateUserModal 
         usuario={usuarioSeleccionado}

@@ -4,6 +4,8 @@ import CategoryServices from "../../services/CategoryServices";
 export default function AddProductModal({ onAdd }) {
   const [categorias, setCategorias] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [errors, setErrors] = useState({});
+
   const [nuevoProducto, setNuevoProducto] = useState({
     name: "",
     price: "",
@@ -29,6 +31,52 @@ export default function AddProductModal({ onAdd }) {
     fetchCategorias();
   }, []);
 
+  useEffect(() => {
+    const err = {};
+
+    // Nombre
+    if (nuevoProducto.name && nuevoProducto.name.trim().length < 2) {
+      err.name = "El nombre debe tener al menos 2 caracteres.";
+    }
+
+    // Categoría
+    if (!nuevoProducto.category_id) {
+      err.category_id = "Debe seleccionar una categoría.";
+    }
+
+    // Precio
+    if (nuevoProducto.price) {
+      if (Number(nuevoProducto.price) <= 0) {
+        err.price = "El precio debe ser mayor a 0.";
+      }
+    }
+
+    // Stock actual
+    if (nuevoProducto.stock_actual && Number(nuevoProducto.stock_actual) < 0) {
+      err.stock_actual = "El stock no puede ser negativo.";
+    }
+
+    // Stock crítico
+    if (nuevoProducto.stock_critico && Number(nuevoProducto.stock_critico) < 0) {
+      err.stock_critico = "El stock crítico no puede ser negativo.";
+    }
+
+    // Imagen (opcional, pero si viene validar URL básica)
+    if (
+      nuevoProducto.image &&
+      !/^https?:\/\/.+\.(jpg|jpeg|png|webp)$/i.test(nuevoProducto.image)
+    ) {
+      err.image = "Debe ser una URL de imagen válida.";
+    }
+
+    // Descripción
+    if (nuevoProducto.description && nuevoProducto.description.length > 255) {
+      err.description = "La descripción no puede superar 255 caracteres.";
+    }
+
+    setErrors(err);
+  }, [nuevoProducto]);
+
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setNuevoProducto((prev) => ({
@@ -38,15 +86,16 @@ export default function AddProductModal({ onAdd }) {
   };
 
   const handleSave = async () => {
-    if (!nuevoProducto.name || !nuevoProducto.category_id) {
-      alert("Por favor completa los campos obligatorios (Nombre y Categoría).");
-      return;
-    }
 
-    if (!nuevoProducto.price || Number(nuevoProducto.price) <= 0) {
-      alert("Por favor ingresa un precio válido.");
-      return;
-    }
+    const errCheck = { ...errors };
+
+    if (!nuevoProducto.name) errCheck.name = "Campo obligatorio.";
+    if (!nuevoProducto.category_id) errCheck.category_id = "Campo obligatorio.";
+    if (!nuevoProducto.price) errCheck.price = "Campo obligatorio.";
+
+    setErrors(errCheck);
+
+    if (Object.keys(errCheck).length > 0) return;
 
     setLoading(true);
 
@@ -64,22 +113,6 @@ export default function AddProductModal({ onAdd }) {
     try {
       await onAdd(productoParaEnviar);
 
-      /* // Cerrar modal correctamente
-      const modalEl = document.getElementById("ModalAgregar");
-      const modalInstance = Modal.getInstance(modalEl) || new Modal(modalEl);
-      modalInstance.hide();
-
-      // Limpiar backdrop manualmente si quedó
-      setTimeout(() => {
-        const backdrop = document.querySelector('.modal-backdrop');
-        if (backdrop) {
-          backdrop.remove();
-        }
-        document.body.classList.remove('modal-open');
-        document.body.style.removeProperty('overflow');
-        document.body.style.removeProperty('padding-right');
-      }, 300); */
-
       // Limpia los campos
       setNuevoProducto({
         name: "",
@@ -91,6 +124,7 @@ export default function AddProductModal({ onAdd }) {
         stock_critico: "",
         active: false,
       });
+      setErrors({});
     } catch (err) {
       console.error("Error al guardar:", err);
     } finally {
@@ -138,6 +172,7 @@ export default function AddProductModal({ onAdd }) {
                   onChange={handleChange}
                   placeholder="Ingrese el nombre del producto"
                 />
+                {errors.name && <div className="text-danger small">{errors.name}</div>}
               </div>
 
               {/* Categoría */}
@@ -160,6 +195,9 @@ export default function AddProductModal({ onAdd }) {
                       </option>
                     ))}
                 </select>
+                {errors.category_id && (
+                  <div className="text-danger small">{errors.category_id}</div>
+                )}
               </div>
 
               {/* Precio */}
@@ -176,6 +214,7 @@ export default function AddProductModal({ onAdd }) {
                   placeholder="0"
                   min="0"
                 />
+                {errors.price && <div className="text-danger small">{errors.price}</div>}
               </div>
 
               {/* Stock Actual */}
@@ -190,6 +229,7 @@ export default function AddProductModal({ onAdd }) {
                   placeholder="0"
                   min="0"
                 />
+                {errors.stock_actual && <div className="text-danger small">{errors.stock_actual}</div>}
               </div>
 
               {/* Stock Crítico */}
@@ -204,6 +244,7 @@ export default function AddProductModal({ onAdd }) {
                   placeholder="0"
                   min="0"
                 />
+                {errors.stock_critico && <div className="text-danger small">{errors.stock_critico}</div>}
               </div>
 
               {/* Imagen */}
@@ -217,6 +258,7 @@ export default function AddProductModal({ onAdd }) {
                   onChange={handleChange}
                   placeholder="https://ejemplo.com/imagen.jpg"
                 />
+                {errors.image && <div className="text-danger small">{errors.image}</div>}
               </div>
 
               {/* Descripción */}

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Modal } from "bootstrap";
-import DeletProdModal from "./DeletProdModal";
+import DeleteModal from "./DeleteModal";
 import UpdateProductModal from "./UpdateProdModal";
 import AddProductModal from "./AddProdModal";
 import ButtonAction from "../atoms/ButtonAction";
@@ -379,8 +379,9 @@ export default function InventoryTable() {
       {/* Modales de Agregar, Editar y Eliminar - Solo Admin*/}
       {esAdmin && (
         <>
-          <DeletProdModal 
-            producto={productoSeleccionado} 
+          <DeleteModal 
+            titulo="Confirmar eliminación"
+            nombre={productoSeleccionado?.name}
             onDelete={() => handleDelete(productoSeleccionado?.id)}
           />
           <UpdateProductModal 

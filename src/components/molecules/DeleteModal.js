@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function DeletProdModal({ usuario, onDelete }) {
+export default function DeleteModal({ titulo, nombre, onDelete }) {
   return (
     <div className="modal fade" id="ModalEliminar" data-bs-backdrop="static" data-bs-keyboard="false"
       tabIndex="-1" aria-labelledby="ModalEliminarLabel" aria-hidden="true"
@@ -9,7 +9,7 @@ export default function DeletProdModal({ usuario, onDelete }) {
         <div className="modal-content">
           <div className="modal-header bg-danger text-white">
             <h5 className="modal-title" id="ModalEliminarLabel">
-              Confirmar eliminación
+              {titulo}
             </h5>
             <button
               type="button"
@@ -20,8 +20,8 @@ export default function DeletProdModal({ usuario, onDelete }) {
           </div>
           <div className="modal-body text-center">
             <p>
-              ¿Seguro que deseas eliminar el usuario{" "}
-              <strong>{usuario?.nombre}</strong>?
+              ¿Seguro que deseas eliminar el producto{" "}
+              <strong>{nombre}</strong>?
             </p>
           </div>
           <div className="modal-footer">

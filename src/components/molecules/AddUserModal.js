@@ -1,16 +1,19 @@
-
 import { useState, useEffect } from "react";
 import { formatearRut, validarRut, validarCorreo, validarTelefono } from "../../utils/UserUtils";
+import UserServices from "../../services/UserServices";
 
 export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario }) {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
+  
   const [nuevoUsuario, setNuevoUsuario] = useState({
     rut: "",
     nombre: "",
     apellidos: "",
     correo: "",
+    confirmarCorreo: "",
     clave: "",
+    confirmarClave: "",
     fecha_nac: "",
     telefonoCodigo: "+56",
     telefono: "",
@@ -36,53 +39,62 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
     }));
   };
 
-  // Validaciones en tiempo real
+  // Limpiar comuna cuando cambia la región
+  useEffect(() => {
+    if (nuevoUsuario.region_id) {
+      setNuevoUsuario((prev) => ({ ...prev, comuna_id: "" }));
+    }
+  }, [nuevoUsuario.region_id]);
+
+  // Validaciones en tiempo real (IGUAL QUE RegisterForm)
   useEffect(() => {
     const err = {};
 
     // Validar RUT
-    if (nuevoUsuario.rut) {
-      if (nuevoUsuario.rut.length >= 12) {
-        if (!validarRut(nuevoUsuario.rut)) {
-          err.rut = "RUT inválido.";
-        }
-      } else {
-        err.rut = "RUT incompleto.";
+    if (nuevoUsuario.rut.length >= 12) {
+      if (!validarRut(nuevoUsuario.rut)) {
+        err.rut = "RUT inválido.";
       }
+    } else if (nuevoUsuario.rut) {
+      err.rut = "RUT incompleto.";
     }
 
-    // Validar nombre
+    // Validar nombre y apellidos
     const nombreRegex = /^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/;
     if (nuevoUsuario.nombre && (nuevoUsuario.nombre.length < 2 || nuevoUsuario.nombre.length > 50 || !nombreRegex.test(nuevoUsuario.nombre))) {
       err.nombre = "Nombre inválido (solo letras, 2-50 caracteres).";
     }
-
-    // Validar apellidos
     if (nuevoUsuario.apellidos && (nuevoUsuario.apellidos.length < 2 || nuevoUsuario.apellidos.length > 100 || !nombreRegex.test(nuevoUsuario.apellidos))) {
       err.apellidos = "Apellidos inválidos (solo letras, 2-100 caracteres).";
     }
 
-    // Validar correo
+    // Validar correo y confirmación
     if (nuevoUsuario.correo && !validarCorreo(nuevoUsuario.correo)) {
       err.correo = "Correo no válido (solo duoc.cl, profesor.duoc.cl o gmail.com).";
     }
+    if (nuevoUsuario.confirmarCorreo && nuevoUsuario.confirmarCorreo !== nuevoUsuario.correo) {
+      err.confirmarCorreo = "El correo de confirmación no coincide.";
+    }
 
-    // Validar contraseña
+    // Validar contraseña y confirmación
     if (nuevoUsuario.clave && (nuevoUsuario.clave.length < 4 || nuevoUsuario.clave.length > 10)) {
       err.clave = "La contraseña debe tener entre 4 y 10 caracteres.";
     }
+    if (nuevoUsuario.confirmarClave && nuevoUsuario.confirmarClave !== nuevoUsuario.clave) {
+      err.confirmarClave = "Las contraseñas no coinciden.";
+    }
 
-    // Validar teléfono (opcional)
+    // Validar teléfono chileno (opcional)
     if (nuevoUsuario.telefono && !validarTelefono(nuevoUsuario.telefonoCodigo + nuevoUsuario.telefono)) {
       err.telefono = "Teléfono inválido. Formato esperado: +569XXXXXXXX";
     }
 
-    // Validar fecha de nacimiento
+    // Validar fecha nacimiento
     if (nuevoUsuario.fecha_nac && new Date(nuevoUsuario.fecha_nac) > new Date()) {
       err.fecha_nac = "La fecha de nacimiento no puede ser futura.";
     }
 
-    // Validar dirección (opcional)
+    // Validar dirección
     if (nuevoUsuario.direccion && (nuevoUsuario.direccion.length < 5 || nuevoUsuario.direccion.length > 255)) {
       err.direccion = "La dirección debe tener entre 5 y 255 caracteres.";
     }
@@ -92,50 +104,85 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
 
   const handleSave = async () => {
     // Validar campos obligatorios
+    const camposObligatorios = ["rut", "nombre", "apellidos", "correo", "confirmarCorreo", "clave", "confirmarClave", "region_id", "comuna_id", "direccion"];
+    const camposVacios = camposObligatorios.filter((k) => !nuevoUsuario[k]);
+
     const errCheck = { ...errors };
-    
-    if (!nuevoUsuario.rut) errCheck.rut = "Campo obligatorio.";
-    if (!nuevoUsuario.nombre) errCheck.nombre = "Campo obligatorio.";
-    if (!nuevoUsuario.apellidos) errCheck.apellidos = "Campo obligatorio.";
-    if (!nuevoUsuario.correo) errCheck.correo = "Campo obligatorio.";
-    if (!nuevoUsuario.clave) errCheck.clave = "Campo obligatorio.";
-    if (!nuevoUsuario.direccion) errCheck.direccion = "Campo obligatorio.";
-    if (!nuevoUsuario.region_id) errCheck.region_id = "Debe seleccionar una región.";
-    if (!nuevoUsuario.comuna_id) errCheck.comuna_id = "Debe seleccionar una comuna.";
-
-    setErrors(errCheck);
-
-    if (Object.keys(errCheck).length > 0) {
-      return;
+    if (camposVacios.length > 0) {
+      camposVacios.forEach((c) => (errCheck[c] = "Campo obligatorio."));
+    }
+    if (!nuevoUsuario.region_id) {
+      errCheck.region_id = "Debe seleccionar una región.";
+    }
+    if (!nuevoUsuario.comuna_id && nuevoUsuario.region_id) {
+      errCheck.comuna_id = "Debe seleccionar una comuna.";
     }
 
-    setLoading(true);
-
-    const usuarioParaEnviar = {
-      rut: nuevoUsuario.rut,
-      nombre: nuevoUsuario.nombre,
-      apellidos: nuevoUsuario.apellidos,
-      correo: nuevoUsuario.correo,
-      clave: nuevoUsuario.clave,
-      fecha_nac: nuevoUsuario.fecha_nac || null,
-      telefono: nuevoUsuario.telefono ? `${nuevoUsuario.telefonoCodigo}${nuevoUsuario.telefono}` : null,
-      direccion: nuevoUsuario.direccion,
-      region_id: Number(nuevoUsuario.region_id),
-      comuna_id: Number(nuevoUsuario.comuna_id),
-      tipoUsuario_id: nuevoUsuario.tipousuario_id ? Number(nuevoUsuario.tipousuario_id) : 3,
-      active: nuevoUsuario.active,
-    };
-
     try {
+      // 1. VALIDAR UNICIDAD — RUT
+      try {
+        await UserServices.getUserByRut(nuevoUsuario.rut);
+        errCheck.rut = "El RUT ya está registrado.";
+        alert("El RUT ya está registrado.");
+        setLoading(false);
+        return;
+      } catch (error) {
+        if (error.response && error.response.status !== 404) {
+          //alert("Error verificando RUT en el servidor.");
+        }
+      }
+
+      // 2. VALIDAR UNICIDAD — CORREO
+      try {
+        await UserServices.getUserByEmail(nuevoUsuario.correo);
+        errCheck.correo = "El correo ya está registrado.";
+        alert("El correo ya está registrado.");
+        setLoading(false);
+        return;
+      } catch (error) {
+        if (error.response && error.response.status !== 404) {
+          //alert("Error verificando correo en el servidor.");
+        }
+      }
+
+      setErrors(errCheck);
+
+      if (Object.keys(errCheck).length > 0) {
+        return;
+      }
+
+      setLoading(true);
+
+      // 3. MAPEAR CAMPOS PARA EL BACKEND
+      const usuarioParaEnviar = {
+        rut: nuevoUsuario.rut,
+        nombre: nuevoUsuario.nombre,
+        apellidos: nuevoUsuario.apellidos,
+        correo: nuevoUsuario.correo,
+        clave: nuevoUsuario.clave,
+        fecha_nac: nuevoUsuario.fecha_nac || null,
+        telefono: nuevoUsuario.telefono ? `${nuevoUsuario.telefonoCodigo}${nuevoUsuario.telefono}` : null,
+        direccion: nuevoUsuario.direccion,
+        region_id: Number(nuevoUsuario.region_id),
+        comuna_id: Number(nuevoUsuario.comuna_id),
+        tipoUsuario_id: nuevoUsuario.tipousuario_id ? Number(nuevoUsuario.tipousuario_id) : 3,
+        active: nuevoUsuario.active,
+      };
+
+      console.log('Creando usuario:', usuarioParaEnviar);
+
+      // 4. CREAR USUARIO
       await onAdd(usuarioParaEnviar);
 
-      // Limpiar campos
+      // 5. LIMPIAR FORMULARIO
       setNuevoUsuario({
         rut: "",
         nombre: "",
         apellidos: "",
         correo: "",
+        confirmarCorreo: "",
         clave: "",
+        confirmarClave: "",
         fecha_nac: "",
         telefonoCodigo: "+56",
         telefono: "",
@@ -146,8 +193,15 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
         active: true,
       });
       setErrors({});
+
     } catch (err) {
       console.error("Error al guardar:", err);
+      if (err.response) {
+        console.error("Detalles del error:", err.response.data);
+        alert(`Error al agregar usuario: ${err.response.data.message || 'Error desconocido'}`);
+      } else {
+        alert("Ocurrió un error inesperado al agregar el usuario.");
+      }
     } finally {
       setLoading(false);
     }
@@ -156,7 +210,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
   // Filtrar comunas por región seleccionada
   const comunasFiltradas = nuevoUsuario.region_id
     ? comunas.filter(c => c.region_id === Number(nuevoUsuario.region_id))
-    : comunas;
+    : [];
 
   return (
     <div
@@ -168,7 +222,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
       aria-labelledby="ModalAgregarUsuarioLabel"
       aria-hidden="true"
     >
-      <div className="modal-dialog modal-dialog-centered modal-lg">
+      <div className="modal-dialog modal-dialog-centered modal-xl modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header bg-success text-white">
             <h5 className="modal-title" id="ModalAgregarUsuarioLabel">
@@ -186,7 +240,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
           <div className="modal-body">
             <div className="row g-3">
               {/* RUT */}
-              <div className="col-md-6">
+              <div className="col-md-12">
                 <label className="form-label fw-semibold">
                   RUT <span className="text-danger">*</span>
                 </label>
@@ -253,6 +307,37 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                 {errors.correo && <div className="text-danger small">{errors.correo}</div>}
               </div>
 
+              {/* Confirmar Correo */}
+              <div className="col-md-6">
+                <label className="form-label fw-semibold">
+                  Confirmar Correo <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="email"
+                  className={`form-control ${errors.confirmarCorreo ? "is-invalid" : ""}`}
+                  name="confirmarCorreo"
+                  value={nuevoUsuario.confirmarCorreo}
+                  onChange={handleChange}
+                  placeholder="*Repetir correo*"
+                  maxLength="100"
+                />
+                {errors.confirmarCorreo && <div className="text-danger small">{errors.confirmarCorreo}</div>}
+              </div>
+
+              {/* Fecha de Nacimiento */}
+              <div className="col-md-12">
+                <label className="form-label fw-semibold">Fecha de Nacimiento (Opcional)</label>
+                <input
+                  type="date"
+                  className={`form-control ${errors.fecha_nac ? "is-invalid" : ""}`}
+                  name="fecha_nac"
+                  value={nuevoUsuario.fecha_nac}
+                  onChange={handleChange}
+                  max={new Date().toISOString().split("T")[0]}
+                />
+                {errors.fecha_nac && <div className="text-danger small">{errors.fecha_nac}</div>}
+              </div>
+
               {/* Contraseña */}
               <div className="col-md-6">
                 <label className="form-label fw-semibold">
@@ -271,22 +356,26 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                 {errors.clave && <div className="text-danger small">{errors.clave}</div>}
               </div>
 
-              {/* Fecha de Nacimiento */}
+              {/* Confirmar Contraseña */}
               <div className="col-md-6">
-                <label className="form-label fw-semibold">Fecha de Nacimiento (Opcional)</label>
+                <label className="form-label fw-semibold">
+                  Confirmar Contraseña <span className="text-danger">*</span>
+                </label>
                 <input
-                  type="date"
-                  className={`form-control ${errors.fecha_nac ? "is-invalid" : ""}`}
-                  name="fecha_nac"
-                  value={nuevoUsuario.fecha_nac}
+                  type="password"
+                  className={`form-control ${errors.confirmarClave ? "is-invalid" : ""}`}
+                  name="confirmarClave"
+                  value={nuevoUsuario.confirmarClave}
                   onChange={handleChange}
-                  max={new Date().toISOString().split("T")[0]}
+                  placeholder="*Repetir contraseña*"
+                  minLength="4"
+                  maxLength="10"
                 />
-                {errors.fecha_nac && <div className="text-danger small">{errors.fecha_nac}</div>}
+                {errors.confirmarClave && <div className="text-danger small">{errors.confirmarClave}</div>}
               </div>
 
               {/* Teléfono */}
-              <div className="col-md-6">
+              <div className="col-md-12">
                 <label className="form-label fw-semibold">Teléfono (Opcional)</label>
                 <div className="input-group">
                   <select
@@ -309,23 +398,6 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                   />
                 </div>
                 {errors.telefono && <div className="text-danger small">{errors.telefono}</div>}
-              </div>
-
-              {/* Dirección */}
-              <div className="col-md-6">
-                <label className="form-label fw-semibold">
-                  Dirección <span className="text-danger">*</span>
-                </label>
-                <input
-                  type="text"
-                  className={`form-control ${errors.direccion ? "is-invalid" : ""}`}
-                  name="direccion"
-                  value={nuevoUsuario.direccion}
-                  onChange={handleChange}
-                  placeholder="Calle Los Prados 123"
-                  maxLength="255"
-                />
-                {errors.direccion && <div className="text-danger small">{errors.direccion}</div>}
               </div>
 
               {/* Región */}
@@ -375,6 +447,23 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                 {errors.comuna_id && <div className="text-danger small">{errors.comuna_id}</div>}
               </div>
 
+              {/* Dirección */}
+              <div className="col-md-12">
+                <label className="form-label fw-semibold">
+                  Dirección <span className="text-danger">*</span>
+                </label>
+                <input
+                  type="text"
+                  className={`form-control ${errors.direccion ? "is-invalid" : ""}`}
+                  name="direccion"
+                  value={nuevoUsuario.direccion}
+                  onChange={handleChange}
+                  placeholder="Calle Los Prados 123"
+                  maxLength="255"
+                />
+                {errors.direccion && <div className="text-danger small">{errors.direccion}</div>}
+              </div>
+
               {/* Tipo de Usuario */}
               <div className="col-md-12">
                 <label className="form-label fw-semibold">Tipo de Usuario</label>
@@ -384,7 +473,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                   value={nuevoUsuario.tipousuario_id}
                   onChange={handleChange}
                 >
-                  <option value="">Seleccionar tipo de usuario</option>
+                  <option value="">Seleccionar tipo de usuario (por defecto: Cliente)</option>
                   {tiposUsuario
                     .filter(t => t.active)
                     .map((t) => (
@@ -398,7 +487,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
               {/* Estado */}
               <div className="col-12">
                 <div className="form-check form-switch d-flex justify-content-center align-items-center gap-5">
-                  <label className="form-check-label" htmlFor="activeSwitch">
+                  <label className="form-check-label fw-semibold" htmlFor="activeSwitch">
                     Usuario activo:
                   </label>
                   <input
@@ -408,6 +497,7 @@ export default function AddUserModal({ onAdd, regiones, comunas, tiposUsuario })
                     name="active"
                     checked={nuevoUsuario.active}
                     onChange={handleChange}
+                    style={{ width: '3rem', height: '1.5rem' }}
                   />
                 </div>
               </div>

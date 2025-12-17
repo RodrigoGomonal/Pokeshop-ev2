@@ -214,8 +214,7 @@ export default function RegisterForm({ onRegistered }) {
 
       //if (onRegistered) onRegistered(response.data);
 
-      alert("Registro exitoso 🎉");
-      window.location.href = '/';
+      window.location.href = '/login'; // Redirigir a login después del registro
 
       // 6. LIMPIAR FORMULARIO
       setForm({
