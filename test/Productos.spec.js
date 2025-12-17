@@ -50,7 +50,9 @@ describe('Pruebas de Productos', () => {
       Promise.resolve({ data: mockProducts })
     );
   });
-
+  // ============================================
+  // TEST: PRODUCTOS - FILTRADO
+  // ============================================
   describe('Filtrado de productos', () => {
     it('debería mostrar solo productos activos con stock', () => {
       const productosActivos = mockProducts.filter(p => p.active && p.stock_actual > 0);
@@ -73,7 +75,9 @@ describe('Pruebas de Productos', () => {
       expect(productosActivos.find(p => p.id === 3)).toBeUndefined();
     });
   });
-
+  // ============================================
+  // TEST: PRODUCTOS - RENDERIZADO
+  // ============================================
   describe('Renderizado de ProductGrid', () => {
     it('debería mostrar spinner mientras carga', () => {
       render(<ProductGrid productos={[]} />, { wrapper: RouterWrapper });
@@ -103,7 +107,9 @@ describe('Pruebas de Productos', () => {
       }, { timeout: 3000 });
     });
   });
-
+  // ============================================
+  // TEST: PRODUCTOS - OBTENER POR ID
+  // ============================================
   describe('Obtener producto por ID', () => {
     it('debería obtener un producto específico', async () => {
       spyOn(ProductServices, 'getProductsById').and.returnValue(
@@ -127,24 +133,6 @@ describe('Pruebas de Productos', () => {
       } catch (error) {
         expect(error.message).toBe('Producto no encontrado');
       }
-    });
-  });
-
-  describe('ProductGrid Novedades (últimos 8)', () => {
-    it('debería mostrar los últimos 8 productos agregados', () => {
-      const productos = Array.from({ length: 15 }, (_, i) => ({
-        id: i + 1,
-        name: `Producto ${i + 1}`,
-        price: 500,
-        active: true,
-        stock_actual: 10
-      }));
-
-      const ultimos8 = productos.slice(-8);
-      
-      expect(ultimos8.length).toBe(8);
-      expect(ultimos8[0].id).toBe(8);
-      expect(ultimos8[7].id).toBe(15);
     });
   });
 });

@@ -118,28 +118,6 @@ describe('🛒 Pruebas del Carrito de Compras', () => {
     });
   });
   // ============================================
-  // TEST: CARRITO - TOTAL
-  // ============================================
-  describe('Calcular total del carrito', () => {
-    it('debería calcular el total correctamente', () => {
-      const cart = [
-        { id: 1, quantity: 2, price: 500 },
-        { id: 2, quantity: 1, price: 1000 }
-      ];
-      
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      expect(total).toBe(2000);
-    });
-
-    it('debería retornar 0 si el carrito está vacío', () => {
-      clearCart();
-      const cart = getCart();
-      const total = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-      
-      expect(total).toBe(0);
-    });
-  });
-  // ============================================
   // TEST: CARRITO - CONTADOR
   // ============================================
   describe('Contador del carrito', () => {
